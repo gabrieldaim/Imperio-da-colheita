@@ -77,7 +77,8 @@ export function emptyTruckAtGarage(game, truckId, now = Date.now()) {
 export function dispatchTruck(game, truckId, destinationId, now = Date.now()) {
   const truck = (game.trucks ?? []).find(item => item.id === truckId)
   const destination = (game.ventures ?? []).find(item => item.id === destinationId)
-  if (!truck || truck.status !== 'garage' || !unitCount(truck.cargo) || !destination) return game
+  if (!truck || truck.status !== 'garage' || !unitCount(truck.cargo) || !destination ||
+      (destination.capacity ?? 15) <= unitCount(destination.stock)) return game
   return { ...replaceTruck(game, { ...truck, destinationId, status: 'outbound',
     readyAt: now + truckModel(truck).travelSeconds * 1000 }), simulatedAt: now }
 }
@@ -179,9 +180,10 @@ export function simulateFreight(game, now = Date.now()) {
       state = autoLoad(state, current, now)
       current = state.trucks.find(item => item.id === truck.id)
     }
+    const availableDestinations = state.ventures.filter(item => (item.capacity ?? 15) > unitCount(item.stock))
     if (state.workers.some(worker => worker.role === 'driver' && worker.trucks?.includes(current.id)) &&
-      unitCount(current.cargo) >= (current.config?.minDispatch ?? 1) && state.ventures.length) {
-      const destination = [...state.ventures].sort((a, b) =>
+      unitCount(current.cargo) >= (current.config?.minDispatch ?? 1) && availableDestinations.length) {
+      const destination = [...availableDestinations].sort((a, b) =>
         ((b.capacity ?? 15) - unitCount(b.stock)) - ((a.capacity ?? 15) - unitCount(a.stock)))[0]
       state = dispatchTruck(state, current.id, destination.id, now)
     }
