@@ -21,6 +21,8 @@ function TruckCard({ game, truck, now, onLoad, onEmpty, onDispatch, onSell, onCo
   useEffect(() => { if (!game.ventures.some(item => item.id === destinationId)) setDestinationId(game.ventures[0]?.id ?? '') }, [game.ventures, destinationId])
   const inFarm = game.inventory.filter(item => item.cropId === cropId).reduce((sum, item) => sum + item.quantity, 0)
   const destination = game.ventures.find(item => item.id === truck.destinationId)
+  const chosenDestination = game.ventures.find(item => item.id === destinationId)
+  const destinationHasSpace = chosenDestination && (chosenDestination.capacity ?? 15) > unitCount(chosenDestination.stock)
   const status = truck.status === 'garage' ? 'Na garagem' : truck.status === 'outbound' ?
     `Indo para ${destination?.name ?? 'destino'} · ${remaining(truck.readyAt, now)}` :
     truck.status === 'unloading' ? 'Aguardando espaço para descarregar' :
@@ -55,7 +57,8 @@ function TruckCard({ game, truck, now, onLoad, onEmpty, onDispatch, onSell, onCo
       <div className="truck-destination"><label>Destino<select value={destinationId} onChange={event => setDestinationId(event.target.value)}>
         {game.ventures.length === 0 && <option value="">Abra um empreendimento primeiro</option>}
         {game.ventures.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}
-      </select></label><button disabled={!cargoCount || !destinationId} onClick={() => onDispatch(truck.id, destinationId)}>Iniciar viagem →</button></div>
+      </select></label><button disabled={!cargoCount || !destinationHasSpace} onClick={() => onDispatch(truck.id, destinationId)}>Iniciar viagem →</button></div>
+      {chosenDestination && !destinationHasSpace && <small className="truck-destination-warning">O destino está cheio. Aguarde espaço para iniciar a viagem.</small>}
       <div className="truck-minor-actions"><button disabled={!cargoCount} onClick={() => onEmpty(truck.id)}>Devolver carga à fazenda</button><button disabled={!!cargoCount} onClick={() => onSell(truck.id)}>Vender caminhão · {money(Math.floor(model.price / 2))}</button></div>
     </>}
     <div className="truck-automation"><span>{autoLoader ? '✓ Carregador designado' : '○ Sem carregador'}</span><span>{autoDriver ? '✓ Motorista designado' : '○ Condução manual'}</span></div>
