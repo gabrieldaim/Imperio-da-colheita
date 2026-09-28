@@ -78,6 +78,21 @@
 .staff-group-tabs,.venture-tabs{display:flex;gap:6px;border-bottom:1px solid #dce8d9;margin:24px 0 5px}
 .staff-group-tabs button,.venture-tabs button{border:0;background:transparent;color:#829886;font-size:12px;font-weight:800;padding:12px 18px;border-bottom:3px solid transparent}
 .staff-group-tabs button.active,.venture-tabs button.active{color:#28633f;border-bottom-color:#69a85f}
+.staff-tab-count{display:inline-block;margin-left:7px;padding:3px 7px;border-radius:7px;background:#e9f1e5;color:#48784f;font-size:10px}
+.staff-role-heading{margin-top:30px}
+.staff-role-picker{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.staff-role-picker button{display:flex;align-items:center;gap:12px;min-width:0;padding:14px;text-align:left;border:1px solid #e0e9dc;border-radius:12px;background:#fff;color:#2c5138;box-shadow:0 4px 14px #28482b08}
+.staff-role-picker button:hover,.staff-role-picker button.active{border-color:#82b378;background:#f1f8ed}
+.staff-role-picker button.active{box-shadow:inset 0 0 0 1px #82b378}
+.staff-picker-icon{width:43px;height:43px;display:grid;place-items:center;flex:none;border-radius:10px;background:#e9f3e3;font-size:23px}
+.staff-role-picker strong,.staff-role-picker small{display:block}.staff-role-picker strong{font-size:13px}.staff-role-picker small{color:#819683;font-size:10px;margin-top:4px}.staff-picker-arrow{margin-left:auto;color:#6ca56a}
+.staff-role-detail{margin-top:18px;padding:23px;background:#fff;border:1px solid #e0e9dc;border-radius:13px}
+.staff-role-intro{display:flex;align-items:center;gap:16px}.staff-role-intro .role-symbol{margin:0;flex:none}.staff-role-intro h2{font:700 24px Fraunces,Georgia,serif;color:#2b5138;margin:4px 0}.staff-role-intro p{font-size:11px;color:#819482;margin:0;line-height:1.6}
+.staff-role-hire{display:flex;align-items:center;justify-content:space-between;gap:18px;padding-top:17px;margin-top:18px;border-top:1px solid #e8eee5}
+.staff-role-hire strong,.staff-role-hire small{display:block}.staff-role-hire strong{font-size:11px;color:#57835a}.staff-role-hire small{font-size:10px;color:#8a9c89;line-height:1.5;margin-top:5px}
+.staff-role-hire button{background:#28633f;border:0;border-radius:8px;color:#fff;font-size:11px;font-weight:800;padding:12px 17px;white-space:nowrap}.staff-role-hire button:hover:not(:disabled){background:#174a30}.staff-role-hire button:disabled{background:#e7eee4;color:#8da38d}
+@media(max-width:1000px){.staff-role-picker{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.staff-role-picker{grid-template-columns:1fr}.staff-role-hire{align-items:stretch;flex-direction:column}.staff-role-hire button{white-space:normal}.staff-group-tabs button{padding:12px 9px}}
 .venture-list-card{width:100%;display:flex;align-items:center;gap:16px;background:#fff;border:1px solid #dfe9dc;border-radius:13px;padding:18px;text-align:left;color:#2c573b}
 .venture-list-card:hover{border-color:#8dbb80;background:#fafcf8}
 .venture-list-icon{width:54px;height:54px;background:#eaf3e5;border-radius:11px;display:grid;place-items:center;font-size:29px}
@@ -121,6 +136,7 @@
 .truck-controls label:nth-child(2){flex:0 0 77px}
 .truck-controls button,.truck-destination button,.save-config{border:0;background:#28633f;color:#fff;border-radius:7px;padding:10px;font-size:10px;font-weight:800;white-space:nowrap}
 .truck-controls button:disabled,.truck-destination button:disabled{background:#e7eee4;color:#8da38d}
+.truck-destination-warning{display:block;margin-top:7px;font-size:10px;color:#9b7843}
 .truck-minor-actions{display:flex;gap:7px;margin-top:10px}
 .truck-minor-actions button{border:1px solid #dce8d6;background:#fff;color:#5c8061;border-radius:7px;padding:8px;font-size:9px;flex:1}
 .truck-minor-actions button:disabled{opacity:.5}
