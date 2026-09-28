@@ -4,6 +4,9 @@ export const LAND_BASE_PRICE = 80
 export const LAND_GROWTH = 1.8
 export const MAX_PLOTS = 20
 export const MAX_WORKER_LEVEL = 10
+export const VENTURES = [
+  { id: 'restaurant', name: 'Restaurante', icon: '🍽️', openingCost: 5000 },
+]
 export const ROLES = [
   { id: 'planter', name: 'Plantador', icon: '🌱', basePrice: 180, ability: 'Semente grátis' },
   { id: 'irrigator', name: 'Regador', icon: '💧', basePrice: 150, ability: 'Rega pela metade do tempo' },
@@ -33,6 +36,7 @@ export function initialGame() {
     workers: [],
     nextWorkerId: 1,
     simulatedAt: Date.now(),
+    ventures: [],
   }
 }
 
@@ -72,6 +76,17 @@ export function cropStats(crop, level) {
 
 export function landPrice(owned) {
   return Math.round(LAND_BASE_PRICE * LAND_GROWTH ** owned)
+}
+
+export function openVenture(game, type, now = Date.now()) {
+  const venture = VENTURES.find(item => item.id === type)
+  if (!venture || game.money < venture.openingCost || (game.ventures ?? []).some(item => item.type === type)) return game
+  return {
+    ...game,
+    money: game.money - venture.openingCost,
+    simulatedAt: now,
+    ventures: [...(game.ventures ?? []), { id: type, type, name: venture.name, stock: [] }],
+  }
 }
 
 export function hirePrice(game, roleId) {
@@ -248,7 +263,8 @@ export function loadGame(storage) {
       !Array.isArray(parsed.plots) || parsed.plots.length > MAX_PLOTS ||
       !Array.isArray(parsed.inventory) || !parsed.progress || typeof parsed.progress !== 'object') return initialGame()
     return { ...parsed, workers: Array.isArray(parsed.workers) ? parsed.workers : [],
-      nextWorkerId: parsed.nextWorkerId ?? 1, simulatedAt: parsed.simulatedAt ?? Date.now() }
+      nextWorkerId: parsed.nextWorkerId ?? 1, simulatedAt: parsed.simulatedAt ?? Date.now(),
+      ventures: Array.isArray(parsed.ventures) ? parsed.ventures : [] }
   } catch {
     return initialGame()
   }
