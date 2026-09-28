@@ -3,14 +3,20 @@ export const STARTING_MONEY = 100
 export const LAND_BASE_PRICE = 80
 export const LAND_GROWTH = 1.8
 export const MAX_PLOTS = 20
+export const MAX_WORKER_LEVEL = 10
+export const ROLES = [
+  { id: 'planter', name: 'Plantador', icon: '🌱', basePrice: 180, ability: 'Semente grátis' },
+  { id: 'irrigator', name: 'Regador', icon: '💧', basePrice: 150, ability: 'Rega pela metade do tempo' },
+  { id: 'harvester', name: 'Colhedor', icon: '🧺', basePrice: 200, ability: 'Colheita em dobro' },
+]
 
 // Keep the balancing rules here so new trade layers can use the same economy.
 export const CROPS = [
   { id: 'wheat', name: 'Trigo', icon: '🌾', cost: 8, value: 40, seconds: 10, color: '#e5ad48' },
-  { id: 'corn', name: 'Milho', icon: '🌽', cost: 25, value: 110, seconds: 38, color: '#edc153' },
-  { id: 'tomato', name: 'Tomate', icon: '🍅', cost: 70, value: 300, seconds: 70, color: '#dc6950' },
-  { id: 'strawberry', name: 'Morango', icon: '🍓', cost: 190, value: 820, seconds: 115, color: '#d65c73' },
-  { id: 'grape', name: 'Uva', icon: '🍇', cost: 520, value: 2200, seconds: 180, color: '#8a70bd' },
+  { id: 'corn', name: 'Milho', icon: '🌽', cost: 25, value: 110, seconds: 21, color: '#edc153' },
+  { id: 'tomato', name: 'Tomate', icon: '🍅', cost: 70, value: 300, seconds: 39, color: '#dc6950' },
+  { id: 'strawberry', name: 'Morango', icon: '🍓', cost: 190, value: 820, seconds: 64, color: '#d65c73' },
+  { id: 'grape', name: 'Uva', icon: '🍇', cost: 520, value: 2200, seconds: 100, color: '#8a70bd' },
 ]
 
 export const PHASES = ['planting', 'watering', 'harvesting']
@@ -24,6 +30,9 @@ export function initialGame() {
     inventory: [],
     totalHarvests: 0,
     totalSales: 0,
+    workers: [],
+    nextWorkerId: 1,
+    simulatedAt: Date.now(),
   }
 }
 
@@ -65,6 +74,52 @@ export function landPrice(owned) {
   return Math.round(LAND_BASE_PRICE * LAND_GROWTH ** owned)
 }
 
+export function hirePrice(game, roleId) {
+  const role = ROLES.find(item => item.id === roleId)
+  return role ? Math.round(role.basePrice * 1.8 ** (game.workers ?? []).filter(worker => worker.role === roleId).length) : Infinity
+}
+
+export function upgradePrice(worker) {
+  const role = ROLES.find(item => item.id === worker.role)
+  return role && worker.level < MAX_WORKER_LEVEL ? Math.round(role.basePrice * 1.6 ** worker.level) : Infinity
+}
+
+export function abilityChance(level) {
+  return Math.min(60, 10 + (level - 1) * 5) / 100
+}
+
+export function hireWorker(game, roleId, now = Date.now()) {
+  const price = hirePrice(game, roleId)
+  if (!Number.isFinite(price) || game.money < price) return game
+  const id = game.nextWorkerId ?? Math.max(0, ...(game.workers ?? []).map(item => item.id)) + 1
+  return { ...game, money: game.money - price, nextWorkerId: id + 1, simulatedAt: now,
+    workers: [...(game.workers ?? []), { id, role: roleId, level: 1, plots: [], cropId: 'wheat' }] }
+}
+
+export function upgradeWorker(game, workerId, now = Date.now()) {
+  const worker = (game.workers ?? []).find(item => item.id === workerId)
+  if (!worker || game.money < upgradePrice(worker)) return game
+  return { ...game, money: game.money - upgradePrice(worker), simulatedAt: now,
+    workers: game.workers.map(item => item.id === workerId ? { ...item, level: item.level + 1 } : item) }
+}
+
+export function toggleWorkerPlot(game, workerId, plotId, now = Date.now()) {
+  const worker = (game.workers ?? []).find(item => item.id === workerId)
+  if (!worker || !game.plots.some(plot => plot.id === plotId)) return game
+  const plots = worker.plots ?? []
+  const selected = plots.includes(plotId)
+  if (!selected && (plots.length >= worker.level || game.workers.some(item => item.id !== workerId && item.role === worker.role && item.plots?.includes(plotId)))) return game
+  return { ...game, simulatedAt: now, workers: game.workers.map(item => item.id === workerId ?
+    { ...item, plots: selected ? plots.filter(id => id !== plotId) : [...plots, plotId] } : item) }
+}
+
+export function chooseWorkerCrop(game, workerId, cropId, now = Date.now()) {
+  const worker = (game.workers ?? []).find(item => item.id === workerId)
+  const index = CROPS.findIndex(item => item.id === cropId)
+  if (!worker || worker.role !== 'planter' || index < 0 || !isUnlocked(game, index)) return game
+  return { ...game, simulatedAt: now, workers: game.workers.map(item => item.id === workerId ? { ...item, cropId } : item) }
+}
+
 export function buyLand(game) {
   if (game.plots.length >= MAX_PLOTS || game.money < landPrice(game.plots.length)) return game
   return {
@@ -74,43 +129,45 @@ export function buyLand(game) {
   }
 }
 
-export function plantCrop(game, plotId, cropId, now) {
+export function plantCrop(game, plotId, cropId, now, free = false) {
   const plot = game.plots.find(item => item.id === plotId)
   const index = CROPS.findIndex(item => item.id === cropId)
   if (!plot || plot.crop || index < 0 || !isUnlocked(game, index)) return game
   const crop = CROPS[index]
-  if (game.money < crop.cost) return game
+  if (!free && game.money < crop.cost) return game
   const level = cropLevel(game, cropId)
   const stats = cropStats(crop, level)
   return {
     ...game,
-    money: game.money - crop.cost,
+    money: game.money - (free ? 0 : crop.cost),
     plots: game.plots.map(item => item.id !== plotId ? item : {
       ...item,
-      crop: { cropId, level, value: stats.value, seconds: stats.seconds, phase: 'planting', readyAt: now + stats.seconds * 1000 },
+      crop: { cropId, level, value: stats.value, seconds: stats.seconds, phaseSeconds: stats.seconds, phase: 'planting', readyAt: now + stats.seconds * 1000 },
     }),
   }
 }
 
-export function advancePlot(game, plotId, now) {
+export function advancePlot(game, plotId, now, options = {}) {
   const plot = game.plots.find(item => item.id === plotId)
   const planted = plot?.crop
   if (!planted || now < planted.readyAt) return game
   const index = PHASES.indexOf(planted.phase)
   if (index === 0 || index === 1) {
+    const duration = index === 0 && options.fastWater ? Math.max(1, Math.ceil(planted.seconds / 2)) : planted.seconds
     return {
       ...game,
       plots: game.plots.map(item => item.id !== plotId ? item : {
         ...item,
-        crop: { ...planted, phase: PHASES[index + 1], readyAt: now + planted.seconds * 1000 },
+        crop: { ...planted, phase: PHASES[index + 1], phaseSeconds: duration, readyAt: now + duration * 1000 },
       }),
     }
   }
   if (index !== 2) return game
   const inventory = [...game.inventory]
   const batch = inventory.find(item => item.cropId === planted.cropId && item.value === planted.value)
-  if (batch) inventory[inventory.indexOf(batch)] = { ...batch, quantity: batch.quantity + 1 }
-  else inventory.push({ cropId: planted.cropId, value: planted.value, quantity: 1 })
+  const quantity = options.doubleHarvest ? 2 : 1
+  if (batch) inventory[inventory.indexOf(batch)] = { ...batch, quantity: batch.quantity + quantity }
+  else inventory.push({ cropId: planted.cropId, value: planted.value, quantity })
   return {
     ...game,
     plots: game.plots.map(item => item.id !== plotId ? item : { ...item, crop: null }),
@@ -118,6 +175,53 @@ export function advancePlot(game, plotId, now) {
     progress: { ...game.progress, [planted.cropId]: { xp: (game.progress[planted.cropId]?.xp ?? 0) + 1 } },
     totalHarvests: game.totalHarvests + 1,
   }
+}
+
+function defaultRoll(worker, plot, time) {
+  const seed = worker.id * 73856093 + plot.id * 19349663 + Math.floor(time / 1000) * 83492791
+  return (Math.imul(seed, 2654435761) >>> 0) / 4294967296
+}
+
+// Process deadlines in chronological order so a worker can complete several
+// cycles while the page was closed. No product is sold automatically.
+export function simulateWorkers(game, now = Date.now(), roll = defaultRoll) {
+  if (!(game.workers ?? []).some(worker => worker.plots?.length)) return game
+  let state = game
+  let cursor = Math.min(now, game.simulatedAt ?? now)
+  let changed = false
+  for (let count = 0; count < 20000; count++) {
+    const jobs = []
+    for (const plot of state.plots) {
+      const role = !plot.crop ? 'planter' : ({ planting: 'irrigator', watering: 'harvester', harvesting: 'harvester' })[plot.crop.phase]
+      const worker = state.workers.find(item => item.role === role && item.plots?.includes(plot.id))
+      if (!worker) continue
+      const time = plot.crop ? Math.max(cursor, plot.crop.readyAt) : cursor
+      if (time <= now) jobs.push({ plot, worker, time })
+    }
+    jobs.sort((a, b) => a.time - b.time || a.plot.id - b.plot.id)
+    let action = null
+    for (const job of jobs) {
+      const { plot, worker, time } = job
+      const special = roll(worker, plot, time) < abilityChance(worker.level)
+      let next
+      if (!plot.crop) {
+        const crop = CROPS.find(item => item.id === worker.cropId)
+        if (!crop || !isUnlocked(state, CROPS.indexOf(crop))) continue
+        next = plantCrop(state, plot.id, crop.id, time, special)
+      } else {
+        next = advancePlot(state, plot.id, time, {
+          fastWater: plot.crop.phase === 'planting' && special,
+          doubleHarvest: plot.crop.phase === 'harvesting' && special,
+        })
+      }
+      if (next !== state) { action = { next, time }; break }
+    }
+    if (!action) break
+    state = action.next
+    cursor = action.time
+    changed = true
+  }
+  return changed ? { ...state, simulatedAt: now } : game
 }
 
 export function sellCrop(game, cropId, quantity) {
@@ -143,7 +247,8 @@ export function loadGame(storage) {
     if (parsed.version !== 1 || !Number.isSafeInteger(parsed.money) || parsed.money < 0 ||
       !Array.isArray(parsed.plots) || parsed.plots.length > MAX_PLOTS ||
       !Array.isArray(parsed.inventory) || !parsed.progress || typeof parsed.progress !== 'object') return initialGame()
-    return parsed
+    return { ...parsed, workers: Array.isArray(parsed.workers) ? parsed.workers : [],
+      nextWorkerId: parsed.nextWorkerId ?? 1, simulatedAt: parsed.simulatedAt ?? Date.now() }
   } catch {
     return initialGame()
   }
