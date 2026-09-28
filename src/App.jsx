@@ -167,7 +167,7 @@ function App() {
     const offer = VENTURES.find(item => item.id === type)
     if (!offer || game.money < offer.openingCost) return
     setGame(previous => openVenture(previous, type))
-    setNotice('Restaurante aberto! O estoque próprio já pode ser consultado.')
+    setNotice('Hortifrúti aberto! O estoque próprio já pode ser consultado.')
   }
 
   return <div className="app-shell">
