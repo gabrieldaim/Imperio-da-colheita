@@ -38,8 +38,8 @@ export default function VenturesPanel({ game, now, onOpen, onExpand, onUpgrade }
         <div className="venture-upgrades">{SALES_UPGRADES.map(upgrade => {
           const level = venture.salesUpgrades?.[upgrade.id] ?? 0
           const price = salesUpgradePrice(venture, upgrade.id)
-          const effect = upgrade.id === 'marketing' ? `0 a ${stats.maxVisits} visitas por ciclo` : upgrade.id === 'conversion' ? `${stats.conversion}% de chance de compra` : `${stats.additional}% de chance de +1 unidade`
-          return <article key={upgrade.id}><div className="venture-upgrade-title"><span>{upgrade.icon}</span><div><h3>{upgrade.name}</h3><small>Nível {level} / {upgrade.maxLevel}</small></div></div><p>{effect}</p><small>{upgrade.id === 'marketing' ? 'Próximo nível: +1 visita máxima' : upgrade.id === 'conversion' ? 'Próximo nível: +5 pontos percentuais' : 'Próximo nível: +10 pontos percentuais'}</small><button disabled={!Number.isFinite(price) || game.money < price} onClick={() => onUpgrade(venture.id, upgrade.id)}>{Number.isFinite(price) ? `Melhorar · ${money(price)}` : 'Nível máximo'}</button></article>
+          const effect = upgrade.id === 'marketing' ? `${stats.minVisits} a ${stats.maxVisits} visitas por ciclo` : upgrade.id === 'conversion' ? `${stats.conversion}% de chance de compra` : `${stats.additional}% de chance de +1 unidade`
+          return <article key={upgrade.id}><div className="venture-upgrade-title"><span>{upgrade.icon}</span><div><h3>{upgrade.name}</h3><small>Nível {level} / {upgrade.maxLevel}</small></div></div><p>{effect}</p><small>{upgrade.id === 'marketing' ? `Próximo nível: ${Math.max(0, level)} a ${stats.maxVisits + 1} visitas` : upgrade.id === 'conversion' ? 'Próximo nível: +5 pontos percentuais' : 'Próximo nível: +10 pontos percentuais'}</small><button disabled={!Number.isFinite(price) || game.money < price} onClick={() => onUpgrade(venture.id, upgrade.id)}>{Number.isFinite(price) ? `Melhorar · ${money(price)}` : 'Nível máximo'}</button></article>
         })}</div>
       </>}
       {detailTab === 'stock' && <>
