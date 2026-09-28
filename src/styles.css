@@ -42,3 +42,35 @@
 .upgrade-button{margin-top:auto;display:flex;justify-content:space-between}
 @media(max-width:1000px){.role-grid{grid-template-columns:1fr}.role-card p{min-height:0}.worker-grid{grid-template-columns:1fr}}
 @media(max-width:760px){.staff-hero{padding:30px}.staff-hero h1{font-size:31px}.staff-hero-icon{right:-10px;font-size:135px}}
+
+.ventures-hero{min-height:205px;border-radius:16px;background:#e9f0df;padding:42px 47px;position:relative;overflow:hidden}
+.ventures-hero h1{font:700 38px Fraunces,Georgia,serif;color:#1d4b36;margin:13px 0 10px;letter-spacing:-.03em}
+.ventures-hero h1 span{color:#8cb86c}
+.ventures-hero p{font-size:12px;color:#718473;max-width:440px;line-height:1.7;margin:0;position:relative;z-index:1}
+.ventures-hero-icon{position:absolute;right:8%;bottom:-44px;font-size:180px;opacity:.25}
+.venture-offer{display:flex;align-items:center;gap:20px;background:#fff;border:1px solid #e2eadf;border-radius:14px;padding:25px;box-shadow:0 5px 20px #28482b08}
+.venture-offer-icon,.venture-summary-icon{flex:none;width:78px;height:78px;background:#eaf3e5;border-radius:14px;display:grid;place-items:center;font-size:41px}
+.venture-offer-copy{flex:1}
+.venture-offer-copy h3{font:700 25px Fraunces,Georgia,serif;color:#28513a;margin:9px 0}
+.venture-offer-copy p{color:#809583;font-size:11px;line-height:1.7;max-width:520px;margin:0}
+.venture-purchase{border-left:1px solid #e7ede4;padding-left:27px;min-width:200px;display:flex;flex-direction:column;align-items:flex-start}
+.venture-purchase>span,.venture-summary>div>span{font-size:9px;font-weight:800;letter-spacing:.13em;color:#8fa18e}
+.venture-purchase strong{font:700 26px Fraunces,Georgia,serif;color:#2c6540;margin:8px 0 14px}
+.venture-purchase button{border:0;border-radius:8px;background:#28633f;color:#fff;font-size:11px;font-weight:800;padding:12px 16px;width:100%;display:flex;justify-content:space-between}
+.venture-purchase button:hover:not(:disabled){background:#174a30}
+.venture-purchase button:disabled{background:#e7eee4;color:#8da38d}
+.venture-purchase small{color:#9aa995;margin-top:7px;font-size:10px}
+.venture-open{font:800 10px 'DM Sans',sans-serif;vertical-align:middle;padding:6px 8px;border-radius:7px;background:#e3f2dc;color:#438858;margin-left:10px}
+.venture-summary{display:flex;gap:20px;align-items:center;background:#fff;border:1px solid #e2eadf;border-radius:14px;padding:24px}
+.venture-summary>div>strong{display:block;font:700 29px Fraunces,Georgia,serif;color:#28513a;margin:6px 0}
+.venture-summary small{font-size:11px;color:#94a594}
+.venture-stock-heading{margin-top:42px}
+.venture-empty{background:#fff;border:1px dashed #c8d9c3;border-radius:13px;min-height:230px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:25px}
+.venture-empty>div{font-size:43px}
+.venture-empty h3{font:700 21px Fraunces,Georgia,serif;color:#28513a;margin:12px 0 8px}
+.venture-empty p{font-size:11px;color:#879c89;margin:0;line-height:1.6}
+.venture-stock-list{display:grid;gap:9px}
+.venture-stock-row{display:flex;align-items:center;gap:13px;padding:16px;background:#fff;border:1px solid #e2eadf;border-radius:10px;font-size:12px}
+.venture-stock-row>span:first-child{font-size:23px}
+.venture-stock-row>span:last-child{margin-left:auto;color:#66866b}
+@media(max-width:760px){.ventures-hero{padding:30px}.ventures-hero h1{font-size:31px}.ventures-hero-icon{right:-8px;font-size:130px}.venture-offer{flex-wrap:wrap;padding:19px}.venture-offer-icon{width:56px;height:56px;font-size:31px}.venture-purchase{border-left:0;border-top:1px solid #e7ede4;padding:16px 0 0;width:100%}.venture-purchase button{max-width:260px}}
