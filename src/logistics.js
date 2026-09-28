@@ -1,4 +1,5 @@
 import { CROPS, simulateWorkers } from './game.js'
+import { simulateSales } from './sales.js'
 
 export const TRUCK_MODELS = [
   { id: 'small', name: 'Caminhão leve', capacity: 25, price: 12000, travelSeconds: 30 },
@@ -172,7 +173,7 @@ export function simulateFreight(game, now = Date.now()) {
     state = unloadIntoVenture(state, state.trucks.find(item => item.id === truck.id), now)
   }
   // The loader follows a per-truck plan. The driver starts a trip once the
-  // configured minimum load is reached, regardless of destination free space.
+  // configured minimum load is reached and a destination has room.
   for (const truck of [...state.trucks]) {
     let current = state.trucks.find(item => item.id === truck.id)
     if (current.status !== 'garage') continue
@@ -196,7 +197,7 @@ export function simulateGame(game, now = Date.now()) {
   let cursor = Math.min(now, game.simulatedAt ?? now)
   let changed = false
   for (let count = 0; count < 20000; count++) {
-    const next = simulateFreight(simulateWorkers(state, cursor), cursor)
+    const next = simulateFreight(simulateSales(simulateFreight(simulateWorkers(state, cursor), cursor), cursor), cursor)
     if (next !== state) { state = next; changed = true }
     const deadlines = []
     for (const plot of state.plots) {
@@ -206,6 +207,9 @@ export function simulateGame(game, now = Date.now()) {
     }
     for (const truck of state.trucks ?? []) {
       if (['outbound', 'returning'].includes(truck.status) && truck.readyAt > cursor) deadlines.push(truck.readyAt)
+    }
+    for (const venture of state.ventures ?? []) {
+      if (venture.nextSalesAt > cursor) deadlines.push(venture.nextSalesAt)
     }
     const nextTime = Math.min(...deadlines)
     if (nextTime > now || !Number.isFinite(nextTime)) return changed ? { ...state, simulatedAt: now } : game
