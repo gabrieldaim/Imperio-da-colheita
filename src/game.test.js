@@ -36,6 +36,8 @@ test('seed progression is shared across plots and unlocks the next crop at level
   assert.ok(cropStats(CROPS[0], 5).seconds < cropStats(CROPS[0], 1).seconds)
   assert.ok(cropStats(CROPS[0], 5).value > cropStats(CROPS[0], 1).value)
   assert.ok(cropStats(CROPS[1], 1).seconds > cropStats(CROPS[0], 5).seconds)
+  assert.equal(cropStats(CROPS[0], 17).seconds, 2)
+  assert.equal(cropStats(CROPS[0], 50).seconds, 2)
 })
 
 test('stock keeps harvest value at collection, and selling one or all pays half', () => {
