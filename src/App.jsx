@@ -9,6 +9,7 @@ import {
   upgradePrice, upgradeWorker, xpAtLevel,
 } from './game.js'
 import { buyTruck, configureTruck, dispatchTruck, emptyTruckAtGarage, loadTruck, sellTruck, simulateGame, toggleWorkerTruck } from './logistics.js'
+import { buySalesUpgrade } from './sales.js'
 
 const money = amount => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(amount)
 const integer = amount => new Intl.NumberFormat('pt-BR').format(amount)
@@ -176,7 +177,7 @@ function App() {
     setNotice('Hortifrúti aberto! O estoque próprio já pode ser consultado.')
   }
   function handleFreight(action, message) {
-    setGame(previous => action(previous))
+    setGame(previous => action(simulateGame(previous, Date.now())))
     if (message) setNotice(message)
   }
 
@@ -207,7 +208,9 @@ function App() {
           onTogglePlot={(workerId, plotId) => setGame(previous => toggleWorkerPlot(previous, workerId, plotId))}
           onToggleTruck={(workerId, truckId) => setGame(previous => toggleWorkerTruck(previous, workerId, truckId))}
           onCrop={(workerId, cropId) => setGame(previous => chooseWorkerCrop(previous, workerId, cropId))} /> : tab === 'ventures' ?
-          <VenturesPanel game={game} onOpen={handleOpenVenture} onExpand={ventureId => handleFreight(previous => expandVentureStock(previous, ventureId), 'Estoque ampliado em 15 espaços.')} /> :
+          <VenturesPanel game={game} now={now} onOpen={handleOpenVenture}
+            onExpand={ventureId => handleFreight(previous => expandVentureStock(previous, ventureId), 'Estoque ampliado em 15 espaços.')}
+            onUpgrade={(ventureId, id) => handleFreight(previous => buySalesUpgrade(previous, ventureId, id), 'Melhoria adquirida! Ela vale a partir do próximo ciclo.')} /> :
           tab === 'freight' ? <FreightPanel game={game} now={now}
             onBuy={modelId => handleFreight(previous => buyTruck(previous, modelId), 'Novo caminhão na garagem.')}
             onSell={truckId => handleFreight(previous => sellTruck(previous, truckId), 'Caminhão vendido.')}
