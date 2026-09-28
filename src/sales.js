@@ -9,8 +9,11 @@ export const SALES_UPGRADES = [
 
 export const salesStats = venture => {
   const { marketing = 0, conversion = 0, additional = 0 } = venture.salesUpgrades ?? {}
-  return { minVisits: Math.max(0, marketing - 1), maxVisits: 2 + marketing, conversion: Math.min(90, 40 + conversion * 5),
-    additional: Math.min(80, additional * 10) }
+  return { minVisits: Math.max(0, marketing - 1),
+    maxVisits: 2 + marketing + Math.floor(Math.max(0, marketing - 3) / 2),
+    conversion: Math.min(90, 40 + conversion * 5), additional: Math.min(80, additional * 10),
+    minExtra: additional ? Math.max(1, additional - 2) : 0,
+    maxExtra: additional }
 }
 
 export function salesUpgradePrice(venture, id) {
@@ -62,7 +65,9 @@ export function runSalesCycle(game, ventureId, at) {
       pick -= weights[i]
       if (pick < 0) { cropId = available[i].id; break }
     }
-    let wanted = 1 + Number(draw(cycle, visitor, 3) < stats.additional / 100)
+    const extra = draw(cycle, visitor, 3) < stats.additional / 100 ?
+      stats.minExtra + Math.floor(draw(cycle, visitor, 4) * (stats.maxExtra - stats.minExtra + 1)) : 0
+    let wanted = 1 + extra
     buyers++
     stock = stock.map(batch => {
       if (batch.cropId !== cropId || !wanted) return batch
