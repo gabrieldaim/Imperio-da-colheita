@@ -115,6 +115,12 @@
 .venture-expand{display:flex;align-items:center;justify-content:space-between;gap:14px;background:#fff;border:1px solid #e2eadf;border-radius:11px;padding:17px 20px;margin:15px 0}
 .venture-expand strong{font-size:12px;color:#315f40}.venture-expand p{font-size:10px;color:#90a18e;margin:5px 0 0}
 .venture-waiting{background:#fff4da;color:#907443;border-radius:8px;padding:13px;font-size:11px}
+.venture-upgrades{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.venture-upgrades article,.venture-reports article{background:#fff;border:1px solid #e2eadf;border-radius:11px;padding:18px}
+.venture-upgrade-title{display:flex;align-items:center;gap:12px}.venture-upgrade-title>span{display:grid;place-items:center;background:#eaf3e5;border-radius:9px;width:40px;height:40px;font-size:22px}.venture-upgrade-title h3{font:700 17px Fraunces,Georgia,serif;color:#28513a;margin:0 0 3px}
+.venture-upgrades small,.venture-reports small{display:block;font-size:10px;color:#899f8b;line-height:1.5}.venture-upgrades p{color:#3a7047;font-size:12px;font-weight:800;margin:17px 0 4px}.venture-upgrades button{background:#28633f;border:0;border-radius:8px;color:#fff;font-size:11px;font-weight:800;padding:11px;width:100%;margin-top:18px}.venture-upgrades button:disabled{background:#e7eee4;color:#8da38d}
+.venture-reports{display:grid;gap:10px}.venture-reports article>div{display:flex;align-items:center;justify-content:space-between;gap:12px}.venture-reports article>div strong{color:#2d6340;font-size:13px}.venture-reports p{font-size:11px;color:#6c856e;margin:12px 0 5px}.venture-reports article>strong{display:block;color:#2d6340;font-size:16px;margin-bottom:6px}
+@media(max-width:900px){.venture-upgrades{grid-template-columns:1fr}}
 .freight-hero{background:#e9f0df;border-radius:16px;min-height:195px;padding:39px 47px;display:flex;justify-content:space-between;overflow:hidden}
 .freight-hero h1{font:700 38px Fraunces,Georgia,serif;color:#1d4b36;margin:13px 0 9px}.freight-hero h1 span{color:#8cb86c}.freight-hero p{font-size:12px;color:#718473}.freight-hero>span{font-size:110px;opacity:.35;align-self:center}
 .truck-shop{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
