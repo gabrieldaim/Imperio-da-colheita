@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { CROPS, abilityChance, advancePlot, buyLand, chooseWorkerCrop, cropLevel, cropStats, hirePrice, hireWorker, initialGame, isUnlocked, landPrice, loadGame, plantCrop, sellCrop, simulateWorkers, toggleWorkerPlot, upgradePrice, upgradeWorker } from './game.js'
+import { CROPS, VENTURES, abilityChance, advancePlot, buyLand, chooseWorkerCrop, cropLevel, cropStats, hirePrice, hireWorker, initialGame, isUnlocked, landPrice, loadGame, openVenture, plantCrop, sellCrop, simulateWorkers, toggleWorkerPlot, upgradePrice, upgradeWorker } from './game.js'
 
 test('the first land leaves enough money for wheat and successive land prices rise', () => {
   const start = initialGame()
@@ -108,4 +108,16 @@ test('old saves load with an empty team', () => {
   const restored = loadGame({ getItem: () => JSON.stringify(old) })
   assert.deepEqual(restored.workers, [])
   assert.equal(restored.nextWorkerId, 1)
+  assert.deepEqual(restored.ventures, [])
+})
+
+test('a restaurant opens once, costs money and starts with its own empty stock', () => {
+  let game = { ...initialGame(), money: 6000, inventory: [{ cropId: 'wheat', value: 40, quantity: 3 }] }
+  game = openVenture(game, 'restaurant', 100)
+  assert.equal(game.money, 6000 - VENTURES[0].openingCost)
+  assert.deepEqual(game.ventures[0].stock, [])
+  assert.equal(game.inventory[0].quantity, 3)
+  assert.equal(openVenture(game, 'restaurant', 200), game)
+  const poor = { ...initialGame(), money: 4999 }
+  assert.equal(openVenture(poor, 'restaurant'), poor)
 })
