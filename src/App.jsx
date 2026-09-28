@@ -1,12 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import StaffPanel from './StaffPanel.jsx'
 import VenturesPanel from './VenturesPanel.jsx'
+import FreightPanel from './FreightPanel.jsx'
 import {
-  CROPS, MAX_PLOTS, PHASES, STORAGE_KEY, VENTURES, advancePlot, buyLand, chooseWorkerCrop, cropLevel,
+  CROPS, MAX_PLOTS, PHASES, STORAGE_KEY, VENTURES, advancePlot, buyLand, chooseWorkerCrop, cropLevel, expandVentureStock,
   cropStats, initialGame, isUnlocked, landPrice, loadGame, nextLevelXp,
-  hirePrice, hireWorker, openVenture, plantCrop, sellCrop, simulateWorkers, toggleWorkerPlot,
+  hirePrice, hireWorker, openVenture, plantCrop, sellCrop, toggleWorkerPlot,
   upgradePrice, upgradeWorker, xpAtLevel,
 } from './game.js'
+import { buyTruck, configureTruck, dispatchTruck, emptyTruckAtGarage, loadTruck, sellTruck, simulateGame, toggleWorkerTruck } from './logistics.js'
 
 const money = amount => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(amount)
 const integer = amount => new Intl.NumberFormat('pt-BR').format(amount)
@@ -28,6 +30,7 @@ function Icon({ name, size = 20 }) {
     store: <><path d="M3 10h18l-1.5-6h-15L3 10Zm1 0v10h16V10M8 20v-6h8v6M3 10c0 3 4 3 4 0 0 3 4 3 4 0 0 3 4 3 4 0 0 3 4 3 4 0" /></>,
     staff: <><circle cx="9" cy="7" r="3" /><path d="M3 20v-2a6 6 0 0 1 12 0v2M17 11a3 3 0 1 0-1-6M17 14a5 5 0 0 1 4 5v1" /></>,
     venture: <><path d="M3 10h18l-1-6H4l-1 6Zm2 0v10h14V10M9 20v-6h6v6M3 10c0 3 4 3 4 0 0 3 4 3 4 0 0 3 4 3 4 0" /></>,
+    freight: <><path d="M3 6h11v11H3V6Zm11 4h4l3 3v4h-7v-7ZM2 17h20M7 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm11 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" /></>,
     plus: <path d="M12 5v14M5 12h14" />,
     arrow: <path d="M5 12h14m-6-6 6 6-6 6" />,
     close: <path d="M6 6l12 12M18 6 6 18" />,
@@ -97,7 +100,10 @@ function SeedModal({ game, plotId, onClose, onSelect }) {
 }
 
 function App() {
-  const [game, setGame] = useState(() => simulateWorkers(loadGame(window.localStorage), Date.now()))
+  const [game, setGame] = useState(() => {
+    const time = Date.now()
+    return simulateGame(loadGame(window.localStorage), time)
+  })
   const [tab, setTab] = useState('farm')
   const [selectedPlot, setSelectedPlot] = useState(null)
   const [now, setNow] = useState(Date.now)
@@ -107,7 +113,7 @@ function App() {
     const timer = window.setInterval(() => {
       const time = Date.now()
       setNow(time)
-      setGame(previous => simulateWorkers(previous, time))
+      setGame(previous => simulateGame(previous, time))
     }, 500)
     return () => window.clearInterval(timer)
   }, [])
@@ -169,6 +175,10 @@ function App() {
     setGame(previous => openVenture(previous, type))
     setNotice('Hortifrúti aberto! O estoque próprio já pode ser consultado.')
   }
+  function handleFreight(action, message) {
+    setGame(previous => action(previous))
+    if (message) setNotice(message)
+  }
 
   return <div className="app-shell">
     <aside className="sidebar">
@@ -179,13 +189,14 @@ function App() {
         <button className={tab === 'inventory' ? 'selected' : ''} onClick={() => setTab('inventory')}><Icon name="store" /> Estoque da fazenda <span className="nav-count">{stockCount}</span></button>
         <button className={tab === 'staff' ? 'selected' : ''} onClick={() => setTab('staff')}><Icon name="staff" /> Funcionários <span className="nav-count">{game.workers.length}</span></button>
         <button className={tab === 'ventures' ? 'selected' : ''} onClick={() => setTab('ventures')}><Icon name="venture" /> Empreendimentos <span className="nav-count">{game.ventures.length}</span></button>
+        <button className={tab === 'freight' ? 'selected' : ''} onClick={() => setTab('freight')}><Icon name="freight" /> Frete <span className="nav-count">{game.trucks.length}</span></button>
       </nav>
       <div className="sidebar-bottom"><div className="season-icon">☀</div><div><strong>Um império começa</strong><span>com uma semente.</span></div></div>
-      <span className="version-label">VERSÃO 0.3 · FAZENDA</span>
+      <span className="version-label">VERSÃO 0.4 · FAZENDA</span>
     </aside>
 
     <main className="main-content">
-      <header className="topbar"><span className="breadcrumb">SEU IMPÉRIO <span>/</span> {tab === 'farm' ? 'FAZENDA' : tab === 'staff' ? 'FUNCIONÁRIOS' : tab === 'ventures' ? 'EMPREENDIMENTOS' : 'ESTOQUE DA FAZENDA'}</span><div className="topbar-right"><span className="saved-indicator"><span /> Salvo no navegador</span><div className="balance"><span>SALDO DISPONÍVEL</span><strong>{money(game.money)}</strong></div></div></header>
+      <header className="topbar"><span className="breadcrumb">SEU IMPÉRIO <span>/</span> {tab === 'farm' ? 'FAZENDA' : tab === 'staff' ? 'FUNCIONÁRIOS' : tab === 'ventures' ? 'EMPREENDIMENTOS' : tab === 'freight' ? 'FRETE' : 'ESTOQUE DA FAZENDA'}</span><div className="topbar-right"><span className="saved-indicator"><span /> Salvo no navegador</span><div className="balance"><span>SALDO DISPONÍVEL</span><strong>{money(game.money)}</strong></div></div></header>
       <div className="content-wrap">
         {tab === 'farm' ? <>
           <section className="hero"><div className="hero-copy"><div className="hero-kicker"><span>✦</span> O INÍCIO DA SUA JORNADA</div><h1>Sua terra.<br /><em>Seu império.</em></h1><p>Plante com cuidado, evolua suas culturas e transforme cada colheita em uma nova oportunidade.</p><div className="hero-meta"><span>✳ &nbsp; {game.plots.length} {game.plots.length === 1 ? 'terreno' : 'terrenos'}</span><span>◷ &nbsp; {activeCount} em cultivo</span></div></div><div className="hero-illustration" aria-hidden="true"><div className="sun" /><div className="hill hill-back" /><div className="hill hill-front" /><div className="farmhouse"><span>▰</span></div><div className="field-row field-row-one">🌱　🌱　🌱</div><div className="field-row field-row-two">🌾　🌾　🌾　🌾</div></div></section>
@@ -194,8 +205,16 @@ function App() {
           <div className="tip-banner"><Icon name="sparkle" size={22} /><p><strong>Dica do campo</strong> Cada colheita dá 1 XP à semente. No nível 5, você libera uma nova cultura. Culturas de nível maior rendem mais e levam menos tempo.</p></div>
         </> : tab === 'staff' ? <StaffPanel game={game} onHire={handleHire} onUpgrade={handleUpgrade}
           onTogglePlot={(workerId, plotId) => setGame(previous => toggleWorkerPlot(previous, workerId, plotId))}
+          onToggleTruck={(workerId, truckId) => setGame(previous => toggleWorkerTruck(previous, workerId, truckId))}
           onCrop={(workerId, cropId) => setGame(previous => chooseWorkerCrop(previous, workerId, cropId))} /> : tab === 'ventures' ?
-          <VenturesPanel game={game} onOpen={handleOpenVenture} /> : <>
+          <VenturesPanel game={game} onOpen={handleOpenVenture} onExpand={ventureId => handleFreight(previous => expandVentureStock(previous, ventureId), 'Estoque ampliado em 15 espaços.')} /> :
+          tab === 'freight' ? <FreightPanel game={game} now={now}
+            onBuy={modelId => handleFreight(previous => buyTruck(previous, modelId), 'Novo caminhão na garagem.')}
+            onSell={truckId => handleFreight(previous => sellTruck(previous, truckId), 'Caminhão vendido.')}
+            onLoad={(truckId, cropId, quantity) => handleFreight(previous => loadTruck(previous, truckId, cropId, quantity), 'Produtos carregados.')}
+            onEmpty={truckId => handleFreight(previous => emptyTruckAtGarage(previous, truckId), 'Carga devolvida à fazenda.')}
+            onDispatch={(truckId, destinationId) => handleFreight(previous => dispatchTruck(previous, truckId, destinationId), 'Caminhão a caminho do destino.')}
+            onConfigure={(truckId, config) => handleFreight(previous => configureTruck(previous, truckId, config), 'Plano de carregamento salvo.')} /> : <>
           <section className="inventory-hero"><div><span className="eyebrow">O FRUTO DO SEU TRABALHO</span><h1>Estoque da fazenda<span>.</span></h1><p>Seus produtos ficam aqui até você decidir o momento de vender.</p></div><div className="inventory-hero-mark" aria-hidden="true">✳</div></section>
           <div className="stat-grid"><div className="stat-card"><span>PRODUTOS EM ESTOQUE</span><strong>{integer(stockCount)}</strong><small>unidades disponíveis</small></div><div className="stat-card"><span>VENDA IMEDIATA</span><strong>{money(stockValue)}</strong><small>valor disponível agora</small></div><div className="stat-card"><span>COLHEITAS REALIZADAS</span><strong>{integer(game.totalHarvests)}</strong><small>desde o início da jornada</small></div></div>
           <div className="section-head stock-title"><div><div className="eyebrow">SEUS PRODUTOS</div><h2>Prontos para vender <span className="count-pill">{groupedStock.length}</span></h2><p>Comerciantes próximos compram na hora por 50% do valor estimado.</p></div></div>
