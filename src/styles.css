@@ -4,3 +4,41 @@
 @media(max-width:1100px){.sidebar{width:220px;flex-basis:220px}.plot-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-illustration{width:45%}.hero-copy{padding-left:30px}.hero p{max-width:320px}}
 @media(max-width:760px){.app-shell{display:block}.sidebar{width:100%;height:auto;position:static;padding:13px 18px;flex-direction:row;align-items:center;gap:15px}.brand{padding:0;flex:none}.brand-symbol{width:33px;height:33px;font-size:23px}.brand strong{font-size:11px}.brand span{font-size:7px}.side-label,.sidebar-bottom,.version-label{display:none}.main-nav{display:flex;flex:1;justify-content:flex-end;gap:2px}.main-nav button{width:auto;padding:9px;gap:5px;font-size:11px}.main-nav button svg{width:17px}.nav-arrow,.nav-count{display:none}.topbar{height:62px;padding:0 18px}.topbar-right{gap:0}.saved-indicator{display:none}.balance{padding-left:0;border:0}.balance strong{font-size:17px}.breadcrumb{font-size:9px}.content-wrap{padding:19px 17px 45px}.hero{height:270px}.hero-copy{padding:30px 24px;max-width:100%}.hero h1{font-size:37px}.hero p{max-width:320px}.hero-illustration{opacity:.4;width:75%;right:-35%}.hero-meta{font-size:10px;gap:12px}.section-head{align-items:flex-start;flex-direction:column;margin-top:30px}.plot-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.plot{padding:11px;min-height:295px}.plot-number,.plot-status{font-size:8px}.soil-scene{height:100px}.phase{font-size:8px}.phase span{width:15px;height:15px}.add-plot{min-height:295px}.stat-grid{gap:8px}.stat-card{padding:15px}.stat-card strong{font-size:21px}.stat-card>span{font-size:8px}.stock-row{flex-wrap:wrap}.stock-name{flex:1}.stock-price{min-width:100px}.stock-actions{width:100%;justify-content:flex-end}.inventory-hero{padding:30px}.inventory-hero h1{font-size:30px}.inventory-hero-mark{right:0}}
 @media(max-width:520px){.brand{gap:6px}.brand-symbol{width:29px;height:29px}.brand strong{font-size:9px}.brand span{font-size:6px}.main-nav button{font-size:0;gap:0;padding:9px 11px}.main-nav button svg{width:21px;height:21px}.balance span{font-size:7px}.balance strong{font-size:15px}.breadcrumb{font-size:8px;letter-spacing:.08em}.plot-grid{grid-template-columns:1fr}.plot{min-height:290px}.soil-scene{height:112px}.add-plot{min-height:170px}.stat-grid{grid-template-columns:1fr}.stat-card{display:flex;align-items:center;gap:15px}.stat-card strong{margin:0 0 0 auto}.stat-card small{display:none}.seed-modal{max-height:95vh}.modal-heading{padding:20px}.modal-heading h2{font-size:23px}.seed-list{padding:13px}.seed-option{gap:9px;padding:9px}.crop-art{height:40px;width:40px;font-size:22px}.seed-select{min-width:65px;padding:9px 7px}.modal-footnote{padding:0 17px 14px}.stock-price{width:100%;padding-left:77px}.stock-actions{justify-content:stretch}.stock-actions button{flex:1}}
+
+.staff-hero{min-height:205px;border-radius:16px;background:#e9f0df;padding:42px 47px;position:relative;overflow:hidden}
+.staff-hero h1{font:700 38px Fraunces,Georgia,serif;color:#1d4b36;margin:13px 0 10px;letter-spacing:-.03em}
+.staff-hero h1 span{color:#8cb86c}
+.staff-hero p{font-size:12px;color:#718473;max-width:410px;line-height:1.7;margin:0;position:relative;z-index:1}
+.staff-hero-icon{position:absolute;right:9%;bottom:-52px;font-size:190px;opacity:.35}
+.role-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.role-card,.worker-card{background:#fff;border:1px solid #e4eae1;border-radius:13px;padding:20px;box-shadow:0 5px 20px #28482b08}
+.role-symbol{width:47px;height:47px;border-radius:11px;background:#e9f3e3;display:grid;place-items:center;font-size:27px;margin-bottom:14px}
+.role-card h3{font:700 19px Fraunces,Georgia,serif;margin:0 0 7px;color:#2b5138}
+.role-card p{font-size:11px;color:#819482;line-height:1.6;min-height:51px;margin:0}
+.role-perk,.worker-ability{font-size:11px;font-weight:700;color:#57835a;background:#edf5e9;padding:9px 10px;border-radius:7px;margin:12px 0}
+.role-card>button,.upgrade-button{background:#28633f;border:0;border-radius:8px;color:#fff;font-size:11px;font-weight:800;padding:12px;width:100%}
+.role-card>button:hover:not(:disabled),.upgrade-button:hover:not(:disabled){background:#174a30}
+.role-card>button:disabled,.upgrade-button:disabled{background:#e7eee4;color:#8da38d}
+.staff-heading{margin-top:43px}
+.staff-empty{background:#fff;border:1px dashed #cbdcc6;border-radius:13px;text-align:center;padding:37px}
+.staff-empty span{font-size:39px}.staff-empty h3{font:700 20px Fraunces,Georgia,serif;color:#28523b;margin:9px 0}
+.staff-empty p{font-size:11px;color:#8da18e;margin:0}
+.worker-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.worker-head{display:flex;align-items:center;gap:11px}
+.worker-avatar{background:#e9f2e2;border-radius:10px;width:44px;height:44px;display:grid;place-items:center;font-size:24px}
+.worker-head h3{font:700 18px Fraunces,Georgia,serif;margin:4px 0 0;color:#2b5138}
+.worker-level{margin-left:auto;background:#e7f2e2;color:#43744a;border-radius:6px;padding:5px 7px;font-size:10px;font-weight:800}
+.worker-info{display:flex;gap:22px;border-top:1px solid #e8eee5;margin-top:15px;padding-top:14px;font-size:10px;color:#8a9c89}
+.worker-info strong{font-size:14px;color:#39734a;display:block;margin-bottom:2px}
+.worker-ability{margin:14px 0}
+.worker-seed{font-size:10px;font-weight:800;letter-spacing:.08em;color:#789078;display:block;margin:16px 0}
+.worker-seed select{display:block;width:100%;padding:10px;border:1px solid #dce8d6;border-radius:7px;background:#fff;color:#315b3b;margin-top:7px;font:600 12px 'DM Sans',sans-serif}
+.worker-plots{margin:15px 0 20px}.worker-plots>span{font-size:9px;font-weight:800;letter-spacing:.12em;color:#8ca08c}
+.worker-plots>small{display:block;color:#9cad9a;margin-top:10px;font-size:10px}
+.worker-plots>div{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+.worker-plots button{border:1px solid #d7e4d1;background:#fff;color:#5e805e;border-radius:7px;font-size:10px;font-weight:700;padding:8px 10px}
+.worker-plots button.assigned{background:#dff0d9;border-color:#8ec784;color:#28633f}
+.worker-plots button:disabled{opacity:.4}
+.upgrade-button{margin-top:auto;display:flex;justify-content:space-between}
+@media(max-width:1000px){.role-grid{grid-template-columns:1fr}.role-card p{min-height:0}.worker-grid{grid-template-columns:1fr}}
+@media(max-width:760px){.staff-hero{padding:30px}.staff-hero h1{font-size:31px}.staff-hero-icon{right:-10px;font-size:135px}}
