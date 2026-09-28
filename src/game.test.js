@@ -79,6 +79,7 @@ test('employees are upgraded with money, gain no XP, and can cover one extra plo
   assert.equal(game.money, 2000 - firstPrice - price)
   assert.equal('xp' in game.workers[0], false)
   assert.equal(abilityChance(2), 0.15)
+  assert.equal(abilityChance(10), 0.55)
   assert.equal(chooseWorkerCrop(game, workerId, 'corn', 0), game)
 })
 
