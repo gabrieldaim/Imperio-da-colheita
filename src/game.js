@@ -89,7 +89,9 @@ export function openVenture(game, type, now = Date.now()) {
     ...game,
     money: game.money - venture.openingCost,
     simulatedAt: now,
-    ventures: [...(game.ventures ?? []), { id: type, type, name: venture.name, stock: [], capacity: 15, stockUpgrades: 0, receivedUnits: 0, deliveries: 0 }],
+    ventures: [...(game.ventures ?? []), { id: type, type, name: venture.name, stock: [], capacity: 15, stockUpgrades: 0, receivedUnits: 0, deliveries: 0,
+      salesUpgrades: { marketing: 0, conversion: 0, additional: 0 }, nextSalesAt: now + 120000,
+      salesCycles: 0, salesTotals: { visits: 0, buyers: 0, missed: 0, units: 0, revenue: 0 }, salesReports: [] }],
   }
 }
 
@@ -284,6 +286,11 @@ export function loadGame(storage) {
         ...item, ...(item.type === 'restaurant' ? { id: 'hortifruti', type: 'hortifruti', name: 'Hortifrúti' } : {}),
         capacity: item.capacity ?? 15, stockUpgrades: item.stockUpgrades ?? 0,
         receivedUnits: item.receivedUnits ?? 0, deliveries: item.deliveries ?? 0,
+        salesUpgrades: { marketing: 0, conversion: 0, additional: 0, ...item.salesUpgrades },
+        nextSalesAt: Number.isFinite(item.nextSalesAt) ? item.nextSalesAt : Date.now() + 120000,
+        salesCycles: item.salesCycles ?? 0,
+        salesTotals: item.salesTotals ?? { visits: 0, buyers: 0, missed: 0, units: 0, revenue: 0 },
+        salesReports: Array.isArray(item.salesReports) ? item.salesReports : [],
       })) : [],
       trucks: Array.isArray(parsed.trucks) ? parsed.trucks : [], nextTruckId: parsed.nextTruckId ?? 1 }
   } catch {
