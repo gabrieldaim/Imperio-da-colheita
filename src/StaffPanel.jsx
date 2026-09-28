@@ -3,31 +3,40 @@ import { CROPS, ROLES, abilityChance, hirePrice, isUnlocked, upgradePrice } from
 
 const money = amount => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(amount)
 const farmRoles = ['planter', 'irrigator', 'harvester']
+const teams = {
+  farm: { name: 'Fazenda', icon: '🌱', roles: farmRoles },
+  freight: { name: 'Transporte', icon: '🚚', roles: ['loader', 'driver'] },
+}
 const roleDescription = {
   planter: 'Planta a semente escolhida quando o terreno está livre.',
   irrigator: 'Inicia a rega quando o plantio termina.',
   harvester: 'Colhe e guarda os produtos no estoque.',
   loader: 'Enche caminhões na garagem conforme o plano de cada veículo.',
-  driver: 'Escolhe um destino aberto e inicia a viagem automaticamente.',
+  driver: 'Escolhe um destino com espaço livre e inicia a viagem quando a carga mínima é atingida.',
 }
 
 export default function StaffPanel({ game, onHire, onUpgrade, onTogglePlot, onToggleTruck, onCrop }) {
   const [group, setGroup] = useState('farm')
-  const roles = ROLES.filter(role => group === 'farm' ? farmRoles.includes(role.id) : !farmRoles.includes(role.id))
-  const workers = game.workers.filter(worker => roles.some(role => role.id === worker.role))
+  const [selectedRole, setSelectedRole] = useState('planter')
+  const roles = ROLES.filter(role => teams[group].roles.includes(role.id))
+  const role = ROLES.find(item => item.id === selectedRole)
+  const workers = game.workers.filter(worker => worker.role === selectedRole)
+  function selectGroup(next) {
+    setGroup(next)
+    if (!teams[next].roles.includes(selectedRole)) setSelectedRole(teams[next].roles[0])
+  }
   return <>
-    <section className="staff-hero"><div><span className="eyebrow">UMA EQUIPE PARA CRESCER</span><h1>Funcionários<span>.</span></h1><p>Organize suas equipes da fazenda e do frete em um só lugar.</p></div><div className="staff-hero-icon" aria-hidden="true">🌿</div></section>
-    <div className="staff-group-tabs"><button className={group === 'farm' ? 'active' : ''} onClick={() => setGroup('farm')}>🌱 Fazenda</button><button className={group === 'freight' ? 'active' : ''} onClick={() => setGroup('freight')}>🚚 Frete</button></div>
-    <div className="section-head"><div><div className="eyebrow">{group === 'farm' ? 'EQUIPE DA FAZENDA' : 'EQUIPE DE LOGÍSTICA'}</div><h2>Contratação</h2><p>Pagamento único, sem salário ou XP. A promoção é paga com dinheiro.</p></div></div>
-    <div className="role-grid">{roles.map(role => <article className="role-card" key={role.id}>
-      <div className="role-symbol">{role.icon}</div><h3>{role.name}</h3><p>{roleDescription[role.id]}</p>
-      <div className="role-perk">✦ {role.ability}</div>
-      <button disabled={game.money < hirePrice(game, role.id)} onClick={() => onHire(role.id)}>Contratar · {money(hirePrice(game, role.id))}</button>
-    </article>)}</div>
-    <div className="section-head staff-heading"><div><div className="eyebrow">EQUIPE CONTRATADA</div><h2>{group === 'farm' ? 'Equipe da fazenda' : 'Equipe do frete'} <span className="count-pill">{workers.length}</span></h2><p>Cada nível permite atuar em mais um {group === 'farm' ? 'terreno' : 'caminhão'}.</p></div></div>
-    {workers.length === 0 ? <div className="staff-empty"><span>{group === 'farm' ? '👩‍🌾' : '🚛'}</span><h3>Nenhum funcionário nesta equipe</h3><p>Contrate uma profissão acima para começar a automatizar tarefas.</p></div> :
+    <section className="staff-hero"><div><span className="eyebrow">ORGANIZE SUA EQUIPE</span><h1>Funcionários<span>.</span></h1><p>Contrate por profissão, escolha os locais de atuação e promova cada funcionário com dinheiro.</p></div><div className="staff-hero-icon" aria-hidden="true">🌿</div></section>
+    <div className="staff-group-tabs" role="group" aria-label="Equipe">{Object.entries(teams).map(([id, item]) => <button key={id} type="button" className={group === id ? 'active' : ''} aria-pressed={group === id} onClick={() => selectGroup(id)}>{item.icon} {item.name} <span className="staff-tab-count">{game.workers.filter(worker => item.roles.includes(worker.role)).length}</span></button>)}</div>
+    <div className="section-head staff-role-heading"><div><div className="eyebrow">EQUIPE DE {teams[group].name.toUpperCase()}</div><h2>Escolha uma profissão</h2><p>Cada profissão cuida de uma tarefa específica.</p></div></div>
+    <div className="staff-role-picker" role="group" aria-label="Profissão">{roles.map(item => {
+      const count = game.workers.filter(worker => worker.role === item.id).length
+      return <button key={item.id} type="button" className={selectedRole === item.id ? 'active' : ''} aria-pressed={selectedRole === item.id} onClick={() => setSelectedRole(item.id)}><span className="staff-picker-icon">{item.icon}</span><span><strong>{item.name}</strong><small>{count} {count === 1 ? 'contratado' : 'contratados'}</small></span><span className="staff-picker-arrow" aria-hidden="true">→</span></button>
+    })}</div>
+    <section className="staff-role-detail" aria-label={`Profissão ${role.name}`}><div className="staff-role-intro"><span className="role-symbol">{role.icon}</span><div><span className="eyebrow">{teams[group].name.toUpperCase()} · {role.name.toUpperCase()}</span><h2>{role.name}</h2><p>{roleDescription[role.id]}</p></div></div><div className="staff-role-hire"><div><strong>✦ {role.ability}</strong><small>Pagamento único, sem salário ou XP. Cada nova contratação desta profissão custa mais.</small></div><button disabled={game.money < hirePrice(game, role.id)} onClick={() => onHire(role.id)}>Contratar {role.name.toLowerCase()} · {money(hirePrice(game, role.id))}</button></div></section>
+    <div className="section-head staff-heading"><div><div className="eyebrow">EQUIPE CONTRATADA</div><h2>{role.name} <span className="count-pill">{workers.length}</span></h2><p>Cada nível permite atribuir mais um {group === 'farm' ? 'terreno' : 'caminhão'}. A promoção é paga com dinheiro.</p></div></div>
+    {workers.length === 0 ? <div className="staff-empty"><span>{role.icon}</span><h3>Nenhum {role.name.toLowerCase()} contratado</h3><p>Contrate acima e escolha {group === 'farm' ? 'os terrenos' : 'os caminhões'} em que vai atuar.</p></div> :
       <div className="worker-grid">{workers.map(worker => {
-        const role = ROLES.find(item => item.id === worker.role)
         const farm = farmRoles.includes(worker.role)
         const selectedIds = farm ? worker.plots ?? [] : worker.trucks ?? []
         const targets = farm ? game.plots : game.trucks
@@ -47,7 +56,7 @@ export default function StaffPanel({ game, onHire, onUpgrade, onTogglePlot, onTo
               const selected = selectedIds.includes(target.id)
               const occupied = game.workers.some(item => item.id !== worker.id && item.role === worker.role &&
                 (farm ? item.plots?.includes(target.id) : item.trucks?.includes(target.id)))
-              return <button key={target.id} className={selected ? 'assigned' : ''} disabled={!selected && (occupied || selectedIds.length >= worker.level)}
+              return <button key={target.id} type="button" className={selected ? 'assigned' : ''} aria-pressed={selected} disabled={!selected && (occupied || selectedIds.length >= worker.level)}
                 onClick={() => farm ? onTogglePlot(worker.id, target.id) : onToggleTruck(worker.id, target.id)}
                 title={occupied ? 'Outro funcionário desta profissão já foi designado' : ''}>
                 {farm ? 'Terreno' : 'Caminhão'} {target.id} {selected ? '✓' : ''}</button>
@@ -57,6 +66,6 @@ export default function StaffPanel({ game, onHire, onUpgrade, onTogglePlot, onTo
           </button>
         </article>
       })}</div>}
-    <div className="tip-banner"><span aria-hidden="true">✦</span><p><strong>Autonomia</strong> Você pode realizar todas as tarefas manualmente. Funcionários executam apenas os trabalhos e destinos designados.</p></div>
+    <div className="tip-banner"><span aria-hidden="true">✦</span><p><strong>Autonomia</strong> Carregadores seguem o plano do caminhão; motoristas escolhem o destino e iniciam a viagem. Você também pode fazer tudo manualmente na aba Frete.</p></div>
   </>
 }
