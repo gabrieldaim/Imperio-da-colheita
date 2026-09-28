@@ -74,3 +74,65 @@
 .venture-stock-row>span:first-child{font-size:23px}
 .venture-stock-row>span:last-child{margin-left:auto;color:#66866b}
 @media(max-width:760px){.ventures-hero{padding:30px}.ventures-hero h1{font-size:31px}.ventures-hero-icon{right:-8px;font-size:130px}.venture-offer{flex-wrap:wrap;padding:19px}.venture-offer-icon{width:56px;height:56px;font-size:31px}.venture-purchase{border-left:0;border-top:1px solid #e7ede4;padding:16px 0 0;width:100%}.venture-purchase button{max-width:260px}}
+
+.staff-group-tabs,.venture-tabs{display:flex;gap:6px;border-bottom:1px solid #dce8d9;margin:24px 0 5px}
+.staff-group-tabs button,.venture-tabs button{border:0;background:transparent;color:#829886;font-size:12px;font-weight:800;padding:12px 18px;border-bottom:3px solid transparent}
+.staff-group-tabs button.active,.venture-tabs button.active{color:#28633f;border-bottom-color:#69a85f}
+.venture-list-card{width:100%;display:flex;align-items:center;gap:16px;background:#fff;border:1px solid #dfe9dc;border-radius:13px;padding:18px;text-align:left;color:#2c573b}
+.venture-list-card:hover{border-color:#8dbb80;background:#fafcf8}
+.venture-list-icon{width:54px;height:54px;background:#eaf3e5;border-radius:11px;display:grid;place-items:center;font-size:29px}
+.venture-list-card strong,.venture-list-card small{display:block}.venture-list-card strong{font:700 18px Fraunces,Georgia,serif}.venture-list-card small{font-size:11px;color:#92a393;margin-top:5px}
+.venture-list-arrow{margin-left:auto;font-size:22px}
+.venture-back{border:0;background:transparent;color:#47794f;padding:7px 0 22px;font-size:12px;font-weight:800}
+.venture-detail-head{display:flex;align-items:center;gap:17px;background:#e9f0df;padding:26px;border-radius:13px}
+.venture-detail-head>span{font-size:42px;background:#fff8;border-radius:12px;padding:12px}.venture-detail-head h1{font:700 32px Fraunces,Georgia,serif;margin:6px 0 0;color:#28513a}
+.venture-tabs{margin:15px 0 24px}
+.venture-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+.venture-stat-grid>div{background:#fff;border:1px solid #e2eadf;border-radius:11px;padding:20px}
+.venture-stat-grid span,.venture-stat-grid small{display:block;font-size:9px;color:#91a491;font-weight:800;letter-spacing:.08em}
+.venture-stat-grid strong{display:block;font:700 26px Fraunces,Georgia,serif;color:#2c6540;margin:8px 0}
+.venture-stat-grid small{font-weight:500;letter-spacing:0}
+.venture-info-card{background:#fff;border:1px solid #e2eadf;border-radius:11px;padding:24px;margin-top:17px}
+.venture-info-card h2{font:700 22px Fraunces,Georgia,serif;margin:0 0 8px;color:#28513a}.venture-info-card p{font-size:11px;color:#7a947c}
+.venture-info-card button,.venture-expand button{background:#28633f;border:0;color:#fff;border-radius:8px;padding:11px 15px;font-size:11px;font-weight:800}
+.venture-expand button:disabled{background:#e7eee4;color:#8da38d}
+.venture-storage-bar{height:8px;border-radius:8px;background:#e5eee3;overflow:hidden}.venture-storage-bar span{height:100%;display:block;background:#78b46f}
+.venture-expand{display:flex;align-items:center;justify-content:space-between;gap:14px;background:#fff;border:1px solid #e2eadf;border-radius:11px;padding:17px 20px;margin:15px 0}
+.venture-expand strong{font-size:12px;color:#315f40}.venture-expand p{font-size:10px;color:#90a18e;margin:5px 0 0}
+.venture-waiting{background:#fff4da;color:#907443;border-radius:8px;padding:13px;font-size:11px}
+.freight-hero{background:#e9f0df;border-radius:16px;min-height:195px;padding:39px 47px;display:flex;justify-content:space-between;overflow:hidden}
+.freight-hero h1{font:700 38px Fraunces,Georgia,serif;color:#1d4b36;margin:13px 0 9px}.freight-hero h1 span{color:#8cb86c}.freight-hero p{font-size:12px;color:#718473}.freight-hero>span{font-size:110px;opacity:.35;align-self:center}
+.truck-shop{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.truck-shop article,.truck-card{background:#fff;border:1px solid #e2eadf;border-radius:12px;padding:17px}
+.truck-shop article>div{font-size:31px}.truck-shop h3{font:700 16px Fraunces,Georgia,serif;color:#28513a;margin:9px 0 6px}
+.truck-shop p{font-size:10px;color:#869b87;min-height:28px}.truck-shop strong{display:block;color:#326e43;font-size:16px;margin:10px 0}
+.truck-shop button{border:0;border-radius:7px;background:#28633f;color:#fff;padding:10px;width:100%;font-size:10px;font-weight:800}
+.truck-shop button:disabled{background:#e7eee4;color:#8da38d}
+.truck-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.truck-heading{display:flex;align-items:center;gap:10px}.truck-avatar{font-size:24px;background:#eaf3e5;padding:9px;border-radius:9px}
+.truck-heading h3{font:700 18px Fraunces,Georgia,serif;color:#28513a;margin:3px 0 0}.truck-heading>strong{margin-left:auto;color:#326e43}
+.truck-status{background:#edf5e9;color:#4c7955;border-radius:7px;margin:13px 0;padding:9px;font-size:10px;font-weight:800}
+.truck-cargo{border-top:1px solid #e7eee4;padding-top:12px;min-height:80px}
+.truck-cargo>span{font-size:9px;letter-spacing:.1em;color:#8a9e89;font-weight:800}.truck-cargo p{font-size:10px;color:#9dac9a}
+.truck-cargo>div{display:flex;justify-content:space-between;padding:7px 0;font-size:11px}.truck-cargo strong{color:#457b50}
+.truck-controls,.truck-destination{display:flex;align-items:end;gap:7px;margin-top:10px}
+.truck-controls label,.truck-destination label{font-size:9px;font-weight:800;color:#819681;flex:1;min-width:0}
+.truck-controls input,.truck-controls select,.truck-destination select{width:100%;margin-top:5px;border:1px solid #dce8d6;border-radius:7px;padding:9px;color:#315b3b;background:#fff}
+.truck-controls label:nth-child(2){flex:0 0 77px}
+.truck-controls button,.truck-destination button,.save-config{border:0;background:#28633f;color:#fff;border-radius:7px;padding:10px;font-size:10px;font-weight:800;white-space:nowrap}
+.truck-controls button:disabled,.truck-destination button:disabled{background:#e7eee4;color:#8da38d}
+.truck-minor-actions{display:flex;gap:7px;margin-top:10px}
+.truck-minor-actions button{border:1px solid #dce8d6;background:#fff;color:#5c8061;border-radius:7px;padding:8px;font-size:9px;flex:1}
+.truck-minor-actions button:disabled{opacity:.5}
+.truck-automation{border-top:1px solid #e7eee4;display:flex;gap:15px;margin-top:15px;padding-top:14px;font-size:10px;color:#6d936f}
+.truck-config-toggle{background:transparent;border:0;color:#346b45;font-size:11px;font-weight:800;padding:12px 0 0}
+.truck-config{border-top:1px solid #e7eee4;margin-top:12px;padding-top:12px}.truck-config p{font-size:10px;color:#7e947f;line-height:1.5}
+.minimum-load{font-size:10px;color:#4f7457;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.minimum-load input,.truck-rule input{width:67px;border:1px solid #dce8d6;border-radius:6px;padding:7px;color:#315b3b}
+.truck-rule-head,.truck-rule{display:grid;grid-template-columns:1fr 82px 108px;gap:5px;align-items:center;margin-top:9px}
+.truck-rule-head{font-size:8px;color:#8ca08b;font-weight:800}.truck-rule{font-size:10px}.truck-rule>div{display:flex;align-items:center;gap:3px}
+.truck-rule>div button{border:1px solid #dce8d6;background:#fff;border-radius:4px;color:#4b8053;padding:3px 5px}
+.truck-rule>div button:disabled{opacity:.3}.truck-rule input{width:100%}.save-config{margin-top:14px;width:100%}
+@media(max-width:1150px){.truck-shop{grid-template-columns:repeat(2,minmax(0,1fr))}.truck-grid{grid-template-columns:1fr}}
+@media(max-width:760px){.venture-stat-grid{grid-template-columns:1fr 1fr}.freight-hero{padding:29px}.freight-hero>span{font-size:65px}.venture-expand{align-items:flex-start;flex-direction:column}.truck-shop{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.venture-stat-grid{grid-template-columns:1fr}.truck-shop{grid-template-columns:1fr 1fr}.truck-shop article{padding:12px}.truck-shop p{min-height:40px}.truck-controls,.truck-destination{flex-wrap:wrap}.truck-destination button{width:100%}.truck-rule-head,.truck-rule{grid-template-columns:1fr 65px 75px}}
