@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { CROPS, VENTURES, abilityChance, advancePlot, buyLand, chooseWorkerCrop, cropLevel, cropStats, expandVentureStock, hirePrice, hireWorker, initialGame, isUnlocked, landPrice, loadGame, openVenture, plantCrop, sellCrop, simulateWorkers, toggleWorkerPlot, upgradePrice, upgradeWorker } from './game.js'
 import { TRUCK_MODELS, buyTruck, configureTruck, dispatchTruck, emptyTruckAtGarage, loadTruck, sellTruck, simulateFreight, simulateGame, toggleWorkerTruck, unitCount } from './logistics.js'
+import { SALES_CYCLE_MS, buySalesUpgrade, runSalesCycle, salesStats, salesUpgradePrice } from './sales.js'
 
 test('the first land leaves enough money for wheat and successive land prices rise', () => {
   const start = initialGame()
@@ -134,6 +135,8 @@ test('existing restaurant purchase becomes a hortifruti without losing stock or 
   assert.equal(restored.ventures[0].name, 'Hortifrúti')
   assert.equal(restored.ventures[0].stock[0].quantity, 4)
   assert.equal(restored.ventures[0].capacity, 15)
+  assert.deepEqual(restored.ventures[0].salesUpgrades, { marketing: 0, conversion: 0, additional: 0 })
+  assert.ok(restored.ventures[0].nextSalesAt > Date.now())
   assert.deepEqual(restored.trucks, [])
   assert.equal(openVenture(restored, 'hortifruti'), restored)
 })
@@ -262,4 +265,65 @@ test('offline automation ships only after a crop is harvested and completes the 
   assert.equal(game.ventures[0].deliveries, 1)
   assert.equal(game.trucks[0].status, 'garage')
   assert.equal(game.inventory.length, 0)
+})
+
+test('hortifruti sells at its saved harvest value once every two minutes and records reports', () => {
+  let game = openVenture({ ...initialGame(), money: 50000 }, 'hortifruti', 0)
+  game = { ...game, ventures: game.ventures.map(item => ({ ...item,
+    stock: [{ cropId: 'wheat', value: 53, quantity: 15 }] })) }
+  assert.equal(runSalesCycle(game, 'hortifruti', SALES_CYCLE_MS - 1), game)
+  game = simulateGame(game, SALES_CYCLE_MS)
+  const report = game.ventures[0].salesReports[0]
+  assert.deepEqual({ visits: report.visits, buyers: report.buyers, units: report.units, revenue: report.revenue },
+    { visits: 2, buyers: 1, units: 1, revenue: 53 })
+  assert.equal(game.money, 10053)
+  assert.equal(game.ventures[0].stock[0].quantity, 14)
+  assert.equal(game.ventures[0].nextSalesAt, SALES_CYCLE_MS * 2)
+  assert.equal(game.ventures[0].salesTotals.revenue, 53)
+  assert.equal(simulateGame(game, SALES_CYCLE_MS), game)
+})
+
+test('shop upgrades cost money, grow independently and affect later cycles', () => {
+  let game = openVenture({ ...initialGame(), money: 100000 }, 'hortifruti', 0)
+  assert.deepEqual(salesStats(game.ventures[0]), { minVisits: 0, maxVisits: 2, conversion: 40, additional: 0 })
+  for (const id of ['marketing', 'conversion', 'additional']) {
+    const price = salesUpgradePrice(game.ventures[0], id)
+    game = buySalesUpgrade(game, 'hortifruti', id, 0)
+    assert.equal(game.ventures[0].salesUpgrades[id], 1)
+    assert.equal(salesUpgradePrice(game.ventures[0], id), Math.round(price * 1.8))
+  }
+  assert.deepEqual(salesStats(game.ventures[0]), { minVisits: 0, maxVisits: 3, conversion: 45, additional: 10 })
+  assert.equal(game.money, 100000 - 500 - 700 - 900 - 40000)
+  assert.equal(buySalesUpgrade({ ...game, money: 0 }, 'hortifruti', 'marketing', 0).ventures[0].salesUpgrades.marketing, 1)
+})
+
+test('additional sales can sell a second unit and never oversell the stock', () => {
+  let game = openVenture({ ...initialGame(), money: 100000 }, 'hortifruti', 0)
+  game = { ...game, ventures: game.ventures.map(item => ({ ...item,
+    stock: [{ cropId: 'wheat', value: 53, quantity: 15 }],
+    salesUpgrades: { marketing: 20, conversion: 10, additional: 8 } })) }
+  const withUpgrade = runSalesCycle(game, 'hortifruti', SALES_CYCLE_MS)
+  const baseline = runSalesCycle({ ...game, ventures: game.ventures.map(item => ({ ...item,
+    salesUpgrades: { ...item.salesUpgrades, additional: 0 } })) }, 'hortifruti', SALES_CYCLE_MS)
+  assert.ok(withUpgrade.ventures[0].salesTotals.units > baseline.ventures[0].salesTotals.units)
+  assert.equal(withUpgrade.ventures[0].salesTotals.units, 15)
+  assert.equal(withUpgrade.ventures[0].stock.length, 0)
+  assert.equal(withUpgrade.ventures[0].salesTotals.revenue, 15 * 53)
+})
+
+test('sales release storage for a waiting truck, including offline cycles', () => {
+  let game = { ...initialGame(), money: 200000, inventory: [{ cropId: 'wheat', value: 40, quantity: 25 }] }
+  game = openVenture(game, 'hortifruti', 0)
+  game = buyTruck(game, 'small', 0)
+  game = loadTruck(game, 1, 'wheat', 25, 0)
+  game = dispatchTruck(game, 1, 'hortifruti', 0)
+  game = simulateGame(game, SALES_CYCLE_MS)
+  assert.equal(game.ventures[0].salesTotals.units, 1)
+  assert.equal(game.ventures[0].stock[0].quantity, 15)
+  assert.equal(game.trucks[0].status, 'unloading')
+  assert.equal(game.trucks[0].cargo[0].quantity, 9)
+  game = simulateGame(game, SALES_CYCLE_MS * 21)
+  assert.equal(game.ventures[0].salesCycles, 21)
+  assert.equal(game.ventures[0].salesReports.length, 20)
+  assert.equal(game.ventures[0].salesTotals.units + unitCount(game.trucks[0].cargo) + unitCount(game.ventures[0].stock), 25)
 })
