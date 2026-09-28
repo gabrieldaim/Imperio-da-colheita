@@ -9,7 +9,7 @@ export const SALES_UPGRADES = [
 
 export const salesStats = venture => {
   const { marketing = 0, conversion = 0, additional = 0 } = venture.salesUpgrades ?? {}
-  return { minVisits: 0, maxVisits: 2 + marketing, conversion: Math.min(90, 40 + conversion * 5),
+  return { minVisits: Math.max(0, marketing - 1), maxVisits: 2 + marketing, conversion: Math.min(90, 40 + conversion * 5),
     additional: Math.min(80, additional * 10) }
 }
 
@@ -45,7 +45,7 @@ export function runSalesCycle(game, ventureId, at) {
   if (!venture || !Number.isFinite(venture.nextSalesAt) || venture.nextSalesAt > at) return game
   const cycle = venture.salesCycles ?? 0
   const stats = salesStats(venture)
-  const visits = Math.floor(draw(cycle, 0, 0) * (stats.maxVisits + 1))
+  const visits = stats.minVisits + Math.floor(draw(cycle, 0, 0) * (stats.maxVisits - stats.minVisits + 1))
   let stock = [...venture.stock]
   let buyers = 0, missed = 0, units = 0, revenue = 0
   const products = {}
