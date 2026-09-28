@@ -6,7 +6,7 @@ export const MAX_PLOTS = 20
 
 // Keep the balancing rules here so new trade layers can use the same economy.
 export const CROPS = [
-  { id: 'wheat', name: 'Trigo', icon: '🌾', cost: 8, value: 40, seconds: 18, color: '#e5ad48' },
+  { id: 'wheat', name: 'Trigo', icon: '🌾', cost: 8, value: 40, seconds: 10, color: '#e5ad48' },
   { id: 'corn', name: 'Milho', icon: '🌽', cost: 25, value: 110, seconds: 38, color: '#edc153' },
   { id: 'tomato', name: 'Tomate', icon: '🍅', cost: 70, value: 300, seconds: 70, color: '#dc6950' },
   { id: 'strawberry', name: 'Morango', icon: '🍓', cost: 190, value: 820, seconds: 115, color: '#d65c73' },
