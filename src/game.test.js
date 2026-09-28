@@ -217,6 +217,23 @@ test('loader follows priorities and reserves; driver chooses a destination and d
   assert.equal(game.inventory.find(item => item.cropId === 'corn').quantity, 6)
 })
 
+test('driver waits when destination is full and departs after storage expansion', () => {
+  let game = { ...initialGame(), money: 200000, inventory: [{ cropId: 'wheat', value: 40, quantity: 25 }] }
+  game = openVenture(game, 'hortifruti', 0)
+  game = { ...game, ventures: game.ventures.map(venture => ({ ...venture,
+    stock: [{ cropId: 'wheat', value: 40, quantity: 15 }] })) }
+  game = buyTruck(game, 'small', 0)
+  game = loadTruck(game, 1, 'wheat', 25, 0)
+  game = configureTruck(game, 1, { ...game.trucks[0].config, minDispatch: 1 }, 0)
+  game = hireWorker(game, 'driver', 0)
+  game = toggleWorkerTruck(game, game.workers[0].id, 1, 0)
+  assert.equal(dispatchTruck(game, 1, 'hortifruti', 0), game)
+  game = simulateFreight(game, 0)
+  assert.equal(game.trucks[0].status, 'garage')
+  game = simulateFreight(expandVentureStock(game, 'hortifruti', 0), 0)
+  assert.equal(game.trucks[0].status, 'outbound')
+})
+
 test('manual unloading at the garage preserves batches, and an occupied truck cannot be sold', () => {
   let game = { ...initialGame(), money: 30000, inventory: [{ cropId: 'wheat', value: 53, quantity: 3 }] }
   game = buyTruck(game, 'small', 0)
