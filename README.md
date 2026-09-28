@@ -1,6 +1,6 @@
 # Império da Colheita
 
-Jogo de navegador em React com fazenda, evolução das sementes, funcionários e venda instantânea do estoque.
+Jogo de navegador em React com fazenda, evolução das sementes, funcionários, estoque e empreendimentos.
 
 ## Executar
 
@@ -29,6 +29,7 @@ npm run build
 - Funcionários têm três profissões: plantador, regador e colhedor. Contratar custa inicialmente R$ 180, R$ 150 e R$ 200, respectivamente. Para cada contratação adicional da mesma profissão, o preço é multiplicado por 1,8. Não há salário nem XP de funcionário.
 - Uma promoção custa `arredondar(preço base da profissão × 1,6 ^ nível atual)`. Cada nível permite designar mais um terreno, até o nível 10. A chance de habilidade especial começa em 10%, cresce 5 pontos percentuais por nível e chega a 55% no nível 10. O plantador pode plantar sem pagar a semente; o regador pode cortar pela metade o tempo da rega; o colhedor pode obter duas unidades. O jogador escolhe os terrenos e a semente de cada plantador. Só um funcionário de cada profissão atua em cada terreno.
 - Ações automatizadas são processadas em ordem cronológica quando o jogo reabre. Funcionários não vendem os produtos. Sem dinheiro para a semente, o plantador aguarda. As ações manuais continuam disponíveis.
+- A aba Empreendimentos permite abrir um restaurante por R$ 5.000 (pagamento único). O restaurante começa com um estoque separado e vazio. Nesta etapa ele não recebe itens, vende ou produz; o transporte e a operação serão definidos posteriormente.
 - O jogo usa apenas `localStorage`, na chave `imperio-da-colheita:v1`. O progresso fica neste navegador e neste domínio; limpar os dados do site apaga o jogo.
 
 As culturas e os números de equilíbrio estão em `src/game.js`. Esta versão não tem backend, conta de usuário ou sincronização entre dispositivos.
