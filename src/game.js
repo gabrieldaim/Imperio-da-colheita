@@ -85,7 +85,7 @@ export function upgradePrice(worker) {
 }
 
 export function abilityChance(level) {
-  return Math.min(60, 10 + (level - 1) * 5) / 100
+  return Math.min(55, 10 + (level - 1) * 5) / 100
 }
 
 export function hireWorker(game, roleId, now = Date.now()) {
