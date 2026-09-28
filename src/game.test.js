@@ -111,13 +111,25 @@ test('old saves load with an empty team', () => {
   assert.deepEqual(restored.ventures, [])
 })
 
-test('a restaurant opens once, costs money and starts with its own empty stock', () => {
+test('a hortifruti opens once, costs money and starts with its own empty stock', () => {
   let game = { ...initialGame(), money: 6000, inventory: [{ cropId: 'wheat', value: 40, quantity: 3 }] }
-  game = openVenture(game, 'restaurant', 100)
+  game = openVenture(game, 'hortifruti', 100)
   assert.equal(game.money, 6000 - VENTURES[0].openingCost)
   assert.deepEqual(game.ventures[0].stock, [])
   assert.equal(game.inventory[0].quantity, 3)
-  assert.equal(openVenture(game, 'restaurant', 200), game)
+  assert.equal(openVenture(game, 'hortifruti', 200), game)
   const poor = { ...initialGame(), money: 4999 }
-  assert.equal(openVenture(poor, 'restaurant'), poor)
+  assert.equal(openVenture(poor, 'hortifruti'), poor)
+})
+
+test('existing restaurant purchase becomes a hortifruti without losing stock or money', () => {
+  const old = { ...initialGame(), money: 321,
+    ventures: [{ id: 'restaurant', type: 'restaurant', name: 'Restaurante',
+      stock: [{ cropId: 'tomato', quantity: 4, value: 300 }] }] }
+  const restored = loadGame({ getItem: () => JSON.stringify(old) })
+  assert.equal(restored.money, 321)
+  assert.equal(restored.ventures[0].type, 'hortifruti')
+  assert.equal(restored.ventures[0].name, 'Hortifrúti')
+  assert.equal(restored.ventures[0].stock[0].quantity, 4)
+  assert.equal(openVenture(restored, 'hortifruti'), restored)
 })
