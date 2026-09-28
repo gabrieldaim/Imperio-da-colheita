@@ -5,12 +5,14 @@ export const LAND_GROWTH = 1.8
 export const MAX_PLOTS = 20
 export const MAX_WORKER_LEVEL = 10
 export const VENTURES = [
-  { id: 'hortifruti', name: 'Hortifrúti', icon: '🥬', openingCost: 5000 },
+  { id: 'hortifruti', name: 'Hortifrúti', icon: '🥬', openingCost: 40000 },
 ]
 export const ROLES = [
   { id: 'planter', name: 'Plantador', icon: '🌱', basePrice: 180, ability: 'Semente grátis' },
   { id: 'irrigator', name: 'Regador', icon: '💧', basePrice: 150, ability: 'Rega pela metade do tempo' },
   { id: 'harvester', name: 'Colhedor', icon: '🧺', basePrice: 200, ability: 'Colheita em dobro' },
+  { id: 'loader', name: 'Carregador', icon: '📦', basePrice: 6000, ability: 'Segue o plano de carregamento do caminhão' },
+  { id: 'driver', name: 'Motorista', icon: '🚚', basePrice: 8000, ability: 'Escolhe o destino e inicia a viagem' },
 ]
 
 // Keep the balancing rules here so new trade layers can use the same economy.
@@ -37,6 +39,8 @@ export function initialGame() {
     nextWorkerId: 1,
     simulatedAt: Date.now(),
     ventures: [],
+    trucks: [],
+    nextTruckId: 1,
   }
 }
 
@@ -85,8 +89,20 @@ export function openVenture(game, type, now = Date.now()) {
     ...game,
     money: game.money - venture.openingCost,
     simulatedAt: now,
-    ventures: [...(game.ventures ?? []), { id: type, type, name: venture.name, stock: [] }],
+    ventures: [...(game.ventures ?? []), { id: type, type, name: venture.name, stock: [], capacity: 15, stockUpgrades: 0, receivedUnits: 0, deliveries: 0 }],
   }
+}
+
+export function stockUpgradePrice(venture) {
+  return Math.round(6000 * 1.8 ** (venture.stockUpgrades ?? 0))
+}
+
+export function expandVentureStock(game, ventureId, now = Date.now()) {
+  const venture = (game.ventures ?? []).find(item => item.id === ventureId)
+  if (!venture || game.money < stockUpgradePrice(venture)) return game
+  return { ...game, money: game.money - stockUpgradePrice(venture), simulatedAt: now,
+    ventures: game.ventures.map(item => item.id === ventureId ?
+      { ...item, capacity: (item.capacity ?? 15) + 15, stockUpgrades: (item.stockUpgrades ?? 0) + 1 } : item) }
 }
 
 export function hirePrice(game, roleId) {
@@ -108,7 +124,7 @@ export function hireWorker(game, roleId, now = Date.now()) {
   if (!Number.isFinite(price) || game.money < price) return game
   const id = game.nextWorkerId ?? Math.max(0, ...(game.workers ?? []).map(item => item.id)) + 1
   return { ...game, money: game.money - price, nextWorkerId: id + 1, simulatedAt: now,
-    workers: [...(game.workers ?? []), { id, role: roleId, level: 1, plots: [], cropId: 'wheat' }] }
+    workers: [...(game.workers ?? []), { id, role: roleId, level: 1, plots: [], trucks: [], cropId: 'wheat' }] }
 }
 
 export function upgradeWorker(game, workerId, now = Date.now()) {
@@ -120,7 +136,7 @@ export function upgradeWorker(game, workerId, now = Date.now()) {
 
 export function toggleWorkerPlot(game, workerId, plotId, now = Date.now()) {
   const worker = (game.workers ?? []).find(item => item.id === workerId)
-  if (!worker || !game.plots.some(plot => plot.id === plotId)) return game
+  if (!worker || !['planter', 'irrigator', 'harvester'].includes(worker.role) || !game.plots.some(plot => plot.id === plotId)) return game
   const plots = worker.plots ?? []
   const selected = plots.includes(plotId)
   if (!selected && (plots.length >= worker.level || game.workers.some(item => item.id !== workerId && item.role === worker.role && item.plots?.includes(plotId)))) return game
@@ -264,8 +280,12 @@ export function loadGame(storage) {
       !Array.isArray(parsed.inventory) || !parsed.progress || typeof parsed.progress !== 'object') return initialGame()
     return { ...parsed, workers: Array.isArray(parsed.workers) ? parsed.workers : [],
       nextWorkerId: parsed.nextWorkerId ?? 1, simulatedAt: parsed.simulatedAt ?? Date.now(),
-      ventures: Array.isArray(parsed.ventures) ? parsed.ventures.map(item => item.type === 'restaurant'
-        ? { ...item, id: 'hortifruti', type: 'hortifruti', name: 'Hortifrúti' } : item) : [] }
+      ventures: Array.isArray(parsed.ventures) ? parsed.ventures.map(item => ({
+        ...item, ...(item.type === 'restaurant' ? { id: 'hortifruti', type: 'hortifruti', name: 'Hortifrúti' } : {}),
+        capacity: item.capacity ?? 15, stockUpgrades: item.stockUpgrades ?? 0,
+        receivedUnits: item.receivedUnits ?? 0, deliveries: item.deliveries ?? 0,
+      })) : [],
+      trucks: Array.isArray(parsed.trucks) ? parsed.trucks : [], nextTruckId: parsed.nextTruckId ?? 1 }
   } catch {
     return initialGame()
   }
