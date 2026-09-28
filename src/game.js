@@ -5,7 +5,7 @@ export const LAND_GROWTH = 1.8
 export const MAX_PLOTS = 20
 export const MAX_WORKER_LEVEL = 10
 export const VENTURES = [
-  { id: 'restaurant', name: 'Restaurante', icon: '🍽️', openingCost: 5000 },
+  { id: 'hortifruti', name: 'Hortifrúti', icon: '🥬', openingCost: 5000 },
 ]
 export const ROLES = [
   { id: 'planter', name: 'Plantador', icon: '🌱', basePrice: 180, ability: 'Semente grátis' },
@@ -80,7 +80,7 @@ export function landPrice(owned) {
 
 export function openVenture(game, type, now = Date.now()) {
   const venture = VENTURES.find(item => item.id === type)
-  if (!venture || game.money < venture.openingCost || (game.ventures ?? []).some(item => item.type === type)) return game
+  if (!venture || game.money < venture.openingCost || (game.ventures ?? []).some(item => item.type === type || (type === 'hortifruti' && item.type === 'restaurant'))) return game
   return {
     ...game,
     money: game.money - venture.openingCost,
@@ -264,7 +264,8 @@ export function loadGame(storage) {
       !Array.isArray(parsed.inventory) || !parsed.progress || typeof parsed.progress !== 'object') return initialGame()
     return { ...parsed, workers: Array.isArray(parsed.workers) ? parsed.workers : [],
       nextWorkerId: parsed.nextWorkerId ?? 1, simulatedAt: parsed.simulatedAt ?? Date.now(),
-      ventures: Array.isArray(parsed.ventures) ? parsed.ventures : [] }
+      ventures: Array.isArray(parsed.ventures) ? parsed.ventures.map(item => item.type === 'restaurant'
+        ? { ...item, id: 'hortifruti', type: 'hortifruti', name: 'Hortifrúti' } : item) : [] }
   } catch {
     return initialGame()
   }
