@@ -297,18 +297,33 @@ test('shop upgrades cost money, grow independently and affect later cycles', () 
   assert.equal(buySalesUpgrade({ ...game, money: 0 }, 'hortifruti', 'marketing', 0).ventures[0].salesUpgrades.marketing, 1)
 })
 
+test('marketing raises the minimum visits after its first upgrade', () => {
+  let game = openVenture({ ...initialGame(), money: 100000 }, 'hortifruti', 0)
+  const expected = [[0, 2], [0, 3], [1, 4], [2, 5]]
+  for (const [level, range] of expected.entries()) {
+    assert.deepEqual([salesStats(game.ventures[0]).minVisits, salesStats(game.ventures[0]).maxVisits], range)
+    for (let cycle = 0; cycle < 25; cycle++) {
+      const at = (cycle + 1) * SALES_CYCLE_MS
+      const state = { ...game, ventures: game.ventures.map(item => ({ ...item, salesCycles: cycle, nextSalesAt: at })) }
+      const visits = runSalesCycle(state, 'hortifruti', at).ventures[0].salesReports[0].visits
+      assert.ok(visits >= range[0] && visits <= range[1])
+    }
+    if (level < expected.length - 1) game = buySalesUpgrade(game, 'hortifruti', 'marketing', 0)
+  }
+})
+
 test('additional sales can sell a second unit and never oversell the stock', () => {
   let game = openVenture({ ...initialGame(), money: 100000 }, 'hortifruti', 0)
   game = { ...game, ventures: game.ventures.map(item => ({ ...item,
-    stock: [{ cropId: 'wheat', value: 53, quantity: 15 }],
+    capacity: 30, stock: [{ cropId: 'wheat', value: 53, quantity: 30 }],
     salesUpgrades: { marketing: 20, conversion: 10, additional: 8 } })) }
   const withUpgrade = runSalesCycle(game, 'hortifruti', SALES_CYCLE_MS)
   const baseline = runSalesCycle({ ...game, ventures: game.ventures.map(item => ({ ...item,
     salesUpgrades: { ...item.salesUpgrades, additional: 0 } })) }, 'hortifruti', SALES_CYCLE_MS)
   assert.ok(withUpgrade.ventures[0].salesTotals.units > baseline.ventures[0].salesTotals.units)
-  assert.equal(withUpgrade.ventures[0].salesTotals.units, 15)
+  assert.equal(withUpgrade.ventures[0].salesTotals.units, 30)
   assert.equal(withUpgrade.ventures[0].stock.length, 0)
-  assert.equal(withUpgrade.ventures[0].salesTotals.revenue, 15 * 53)
+  assert.equal(withUpgrade.ventures[0].salesTotals.revenue, 30 * 53)
 })
 
 test('sales release storage for a waiting truck, including offline cycles', () => {
