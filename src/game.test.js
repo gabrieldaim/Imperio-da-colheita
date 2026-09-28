@@ -285,14 +285,14 @@ test('hortifruti sells at its saved harvest value once every two minutes and rec
 
 test('shop upgrades cost money, grow independently and affect later cycles', () => {
   let game = openVenture({ ...initialGame(), money: 100000 }, 'hortifruti', 0)
-  assert.deepEqual(salesStats(game.ventures[0]), { minVisits: 0, maxVisits: 2, conversion: 40, additional: 0 })
+  assert.deepEqual(salesStats(game.ventures[0]), { minVisits: 0, maxVisits: 2, conversion: 40, additional: 0, minExtra: 0, maxExtra: 0 })
   for (const id of ['marketing', 'conversion', 'additional']) {
     const price = salesUpgradePrice(game.ventures[0], id)
     game = buySalesUpgrade(game, 'hortifruti', id, 0)
     assert.equal(game.ventures[0].salesUpgrades[id], 1)
     assert.equal(salesUpgradePrice(game.ventures[0], id), Math.round(price * 1.8))
   }
-  assert.deepEqual(salesStats(game.ventures[0]), { minVisits: 0, maxVisits: 3, conversion: 45, additional: 10 })
+  assert.deepEqual(salesStats(game.ventures[0]), { minVisits: 0, maxVisits: 3, conversion: 45, additional: 10, minExtra: 1, maxExtra: 1 })
   assert.equal(game.money, 100000 - 500 - 700 - 900 - 40000)
   assert.equal(buySalesUpgrade({ ...game, money: 0 }, 'hortifruti', 'marketing', 0).ventures[0].salesUpgrades.marketing, 1)
 })
@@ -310,10 +310,29 @@ test('marketing raises the minimum visits after its first upgrade', () => {
     }
     if (level < expected.length - 1) game = buySalesUpgrade(game, 'hortifruti', 'marketing', 0)
   }
+  const atMaximum = { ...game.ventures[0], salesUpgrades: { ...game.ventures[0].salesUpgrades, marketing: 20 } }
+  assert.deepEqual([salesStats(atMaximum).minVisits, salesStats(atMaximum).maxVisits], [19, 30])
 })
 
-test('additional sales can sell a second unit and never oversell the stock', () => {
+test('additional sales grow in chance and quantity at every level and never oversell', () => {
   let game = openVenture({ ...initialGame(), money: 100000 }, 'hortifruti', 0)
+  const ranges = [[0, 0], [1, 1], [1, 2], [1, 3], [2, 4], [3, 5], [4, 6], [5, 7], [6, 8]]
+  for (const [level, [min, max]] of ranges.entries()) {
+    const venture = { ...game.ventures[0], salesUpgrades: { ...game.ventures[0].salesUpgrades, additional: level } }
+    assert.deepEqual([salesStats(venture).additional, salesStats(venture).minExtra, salesStats(venture).maxExtra],
+      [level * 10, min, max])
+    let observedExtra = false
+    for (let cycle = 0; cycle < 300; cycle++) {
+      const at = (cycle + 1) * SALES_CYCLE_MS
+      const state = { ...game, ventures: [{ ...venture, stock: [{ cropId: 'wheat', value: 53, quantity: 100 }],
+        salesCycles: cycle, nextSalesAt: at }] }
+      const report = runSalesCycle(state, 'hortifruti', at).ventures[0].salesReports[0]
+      if (report.buyers !== 1) continue
+      assert.ok(report.units === 1 || (report.units >= min + 1 && report.units <= max + 1))
+      if (report.units > 1) observedExtra = true
+    }
+    if (level > 0) assert.ok(observedExtra)
+  }
   game = { ...game, ventures: game.ventures.map(item => ({ ...item,
     capacity: 30, stock: [{ cropId: 'wheat', value: 53, quantity: 30 }],
     salesUpgrades: { marketing: 20, conversion: 10, additional: 8 } })) }
