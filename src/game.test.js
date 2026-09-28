@@ -17,7 +17,7 @@ test('each phase waits for its deadline and a separate click, even after a long 
   assert.equal(advancePlot(game, 1, deadline - 1), game)
   game = advancePlot(game, 1, deadline + 1000000)
   assert.equal(game.plots[0].crop.phase, 'watering')
-  assert.equal(game.plots[0].crop.readyAt, deadline + 1000000 + 18000)
+  assert.equal(game.plots[0].crop.readyAt, deadline + 1000000 + CROPS[0].seconds * 1000)
   game = advancePlot(game, 1, game.plots[0].crop.readyAt)
   assert.equal(game.plots[0].crop.phase, 'harvesting')
   game = advancePlot(game, 1, game.plots[0].crop.readyAt)
