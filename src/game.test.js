@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { CROPS, advancePlot, buyLand, cropLevel, cropStats, initialGame, isUnlocked, landPrice, loadGame, plantCrop, sellCrop } from './game.js'
+import { CROPS, abilityChance, advancePlot, buyLand, chooseWorkerCrop, cropLevel, cropStats, hirePrice, hireWorker, initialGame, isUnlocked, landPrice, loadGame, plantCrop, sellCrop, simulateWorkers, toggleWorkerPlot, upgradePrice, upgradeWorker } from './game.js'
 
 test('the first land leaves enough money for wheat and successive land prices rise', () => {
   const start = initialGame()
@@ -54,4 +54,57 @@ test('stock keeps harvest value at collection, and selling one or all pays half'
 test('malformed saved game starts fresh', () => {
   assert.deepEqual(loadGame({ getItem: () => '{broken' }), initialGame())
   assert.deepEqual(loadGame({ getItem: () => JSON.stringify({ version: 1, money: -5, plots: [], inventory: [], progress: {} }) }), initialGame())
+})
+
+test('all crop times follow the proportional reduction from 18 to 10 seconds', () => {
+  assert.deepEqual(CROPS.map(item => item.seconds), [10, 21, 39, 64, 100])
+  assert.equal(cropStats(CROPS[0], 17).seconds, 2)
+})
+
+test('employees are upgraded with money, gain no XP, and can cover one extra plot per level', () => {
+  let game = { ...buyLand(buyLand({ ...initialGame(), money: 3000 })), money: 2000 }
+  const firstPrice = hirePrice(game, 'planter')
+  game = hireWorker(game, 'planter', 0)
+  assert.equal(game.money, 2000 - firstPrice)
+  assert.equal(hirePrice(game, 'planter'), Math.round(firstPrice * 1.8))
+  const workerId = game.workers[0].id
+  game = toggleWorkerPlot(game, workerId, 1, 0)
+  assert.deepEqual(game.workers[0].plots, [1])
+  assert.equal(toggleWorkerPlot(game, workerId, 2, 0), game)
+  const price = upgradePrice(game.workers[0])
+  game = upgradeWorker(game, workerId, 0)
+  assert.equal(game.workers[0].level, 2)
+  game = toggleWorkerPlot(game, workerId, 2, 0)
+  assert.deepEqual(game.workers[0].plots, [1, 2])
+  assert.equal(game.money, 2000 - firstPrice - price)
+  assert.equal('xp' in game.workers[0], false)
+  assert.equal(abilityChance(2), 0.15)
+  assert.equal(chooseWorkerCrop(game, workerId, 'corn', 0), game)
+})
+
+test('assigned employees process an offline cycle and apply all three abilities', () => {
+  let game = { ...buyLand(initialGame()), money: 2000 }
+  for (const role of ['planter', 'irrigator', 'harvester']) {
+    game = hireWorker(game, role, 0)
+    game = toggleWorkerPlot(game, game.workers.at(-1).id, 1, 0)
+  }
+  const moneyBefore = game.money
+  game = simulateWorkers(game, 30000, () => 0)
+  assert.equal(game.inventory[0].quantity, 2)
+  assert.equal(game.progress.wheat.xp, 1)
+  assert.equal(game.totalHarvests, 1)
+  assert.equal(game.money, moneyBefore) // free planting, no wages
+  assert.equal(game.plots[0].crop.phase, 'planting') // next cycle already started
+  assert.equal(game.plots[0].crop.readyAt, 35000)
+  assert.equal(simulateWorkers(game, 30000, () => 0), game)
+})
+
+test('old saves load with an empty team', () => {
+  const old = initialGame()
+  delete old.workers
+  delete old.nextWorkerId
+  delete old.simulatedAt
+  const restored = loadGame({ getItem: () => JSON.stringify(old) })
+  assert.deepEqual(restored.workers, [])
+  assert.equal(restored.nextWorkerId, 1)
 })
