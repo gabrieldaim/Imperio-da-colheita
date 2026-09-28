@@ -55,7 +55,7 @@ export function isUnlocked(game, cropIndex) {
 
 export function cropStats(crop, level) {
   return {
-    seconds: Math.max(5, Math.ceil(crop.seconds * Math.max(0.5, 1 - (level - 1) * 0.05))),
+    seconds: Math.max(1, Math.ceil(crop.seconds * Math.max(0.2, 1 - (level - 1) * 0.05))),
     value: Math.round(crop.value * (1 + (level - 1) * 0.08)),
     cost: crop.cost,
   }
