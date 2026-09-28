@@ -161,13 +161,13 @@ function App() {
   function handleHire(roleId) {
     if (game.money < hirePrice(game, roleId)) return
     setGame(previous => hireWorker(previous, roleId))
-    setNotice('Funcionário contratado! Selecione os terrenos em que ele vai atuar.')
+    setNotice(['loader', 'driver'].includes(roleId) ? 'Funcionário contratado! Atribua caminhões na equipe de Transporte.' : 'Funcionário contratado! Atribua terrenos na equipe da Fazenda.')
   }
   function handleUpgrade(workerId) {
     const worker = game.workers.find(item => item.id === workerId)
     if (!worker || game.money < upgradePrice(worker)) return
     setGame(previous => upgradeWorker(previous, workerId))
-    setNotice('Funcionário promovido! Mais um terreno e maior chance especial.')
+    setNotice(['loader', 'driver'].includes(worker.role) ? 'Funcionário promovido! Ele pode atuar em mais um caminhão.' : 'Funcionário promovido! Mais um terreno e maior chance especial.')
   }
   function handleOpenVenture(type) {
     const offer = VENTURES.find(item => item.id === type)
